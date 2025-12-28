@@ -1,0 +1,60 @@
+/* UrbanMind color palette */
+:root {
+  /* Primary colors */
+  --um-white: #FFFFE5;
+  
+  --um-dark-blue: #0067D0;
+  --um-light-gray: #EFEFEF5;
+  --um-medium-gray: #6A6A6A;
+  --um-orange: rgb(243, 109, 11);
+  --um-orange-soft: rgb(228, 134, 67);
+  --um-gray-50: #FFFFFE5;
+   
+  /* Dividers */
+  --um-divider-light: rgba(106, 106, 106, 0.2);
+  --um-divider-dark: rgba(0, 103, 208, 0.2);
+  --um-orange-light: rgba(228,134,67,0.5);
+  /* Text colors */
+  --um-text-primary: #0067D0;
+  --um-text-secondary: #6A6A6A;
+  --um-text-white: #FFFFE5;
+}
+
+/* Semantic color variables for UrbanMind */
+:root {
+  --color-background: var(--um-white);
+  --color-background-soft: var(--um-light-gray);
+  --color-background-mute: var(--um-gray-50);
+
+  --color-border: var(--um-divider-light);
+  --color-border-hover: var(--um-medium-gray);
+
+  --color-heading: var(--um-dark-blue);
+  --color-text: var(--um-medium-gray);
+  --color-accent: var(--um-orange);
+
+  --section-gap: 80px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--color-text);
+  background: var(--color-background);
+  transition:
+    color 0.5s,
+    background-color 0.5s;
+  line-height: 1.6;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
