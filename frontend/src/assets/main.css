@@ -2,13 +2,16 @@
 :root {
   /* Primary colors */
   --um-white: #FFFFFF;
+
   --um-white-soft: #FFFFE5;
+
   
   --um-dark-blue: #0067D0;
   --um-light-gray: #EFEFEF5;
   --um-medium-gray: #6A6A6A;
   --um-orange: rgb(243, 109, 11);
   --um-orange-soft: rgb(228, 134, 67);
+
   --um-gray-50: #FFFFE5;
   
   /* Dividers */
