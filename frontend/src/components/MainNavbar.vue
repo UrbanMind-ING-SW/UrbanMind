@@ -41,6 +41,7 @@ function goToLogin() {
   position: relative;
   z-index: 10;
   gap: 1rem;
+
   border-bottom: 1px solid var(--color-border);
 
 }
@@ -52,7 +53,7 @@ function goToLogin() {
   transition: opacity 0.2s ease;
   justify-self: start;
   min-width: 0;
-  
+
 }
 
 .um-brand:hover {
