@@ -57,10 +57,19 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import MainNavbar from '@/components/MainNavbar.vue'
 
+const router = useRouter()
+
 function goTo(section: 'bilancio' | 'proposte' | 'segnalazioni') {
-  console.log('Vai a sezione:', section)
+  const routeMap = {
+    bilancio: { name: 'budget' },
+    proposte: { name: 'proposals' },
+    segnalazioni: { name: 'new-report' }
+  }
+  
+  router.push(routeMap[section])
 }
 </script>
 
