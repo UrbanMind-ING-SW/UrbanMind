@@ -1,8 +1,7 @@
 /* UrbanMind color palette */
 :root {
   /* Primary colors */
-  --um-white: #FFFFFF;
-  --um-white-soft: #FFFFFE5;
+  --um-white: #FFFFE5;
   
   --um-dark-blue: #0067D0;
   --um-light-gray: #EFEFEF5;
@@ -10,7 +9,7 @@
   --um-orange: rgb(243, 109, 11);
   --um-orange-soft: rgb(228, 134, 67);
   --um-gray-50: #FFFFFE5;
-  
+   
   /* Dividers */
   --um-divider-light: rgba(106, 106, 106, 0.2);
   --um-divider-dark: rgba(0, 103, 208, 0.2);
@@ -18,7 +17,7 @@
   /* Text colors */
   --um-text-primary: #0067D0;
   --um-text-secondary: #6A6A6A;
-  --um-text-white: #FFFFFF;
+  --um-text-white: #FFFFE5;
 }
 
 /* Semantic color variables for UrbanMind */
