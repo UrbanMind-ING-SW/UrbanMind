@@ -38,7 +38,7 @@ function goToLogin() {
   width: 100vw;
   align-items: center;
   padding: 0 2rem; 
-  background: var(--um-white);
+  background: var(--um-white-soft);
   color: var(--um-orange);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
     sans-serif;
@@ -90,4 +90,3 @@ function goToLogin() {
   color: var(--um-orange);
 }
 </style>
-
