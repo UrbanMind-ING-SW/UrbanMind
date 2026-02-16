@@ -77,17 +77,19 @@ function goTo(section: 'bilancio' | 'proposte' | 'segnalazioni') {
 .home-main {
   width: 100vw;
   margin: 0 auto;
+  background: var(--color-accent);
 }
 
 .home-cards {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
 }
 
 .home-card {
-  background: var(--um-orange);
-  color: var(--um-white);
-  height: 90vh;
+  background: var(--color-accent);
+  color: var(--color-text-white);
+  height: 95vh;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -103,20 +105,18 @@ function goTo(section: 'bilancio' | 'proposte' | 'segnalazioni') {
 
 .home-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
-  opacity: 1;
-}
-
-.home-card:focus {
-  outline: 3px solid var(--um-white);
-  outline-offset: -3px;
+  box-shadow: 0 8px 25px 0 rgba(0, 0, 0, 0.25);
   opacity: 1;
 }
 
 .home-card:active {
   transform: translateY(-2px);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+  box-shadow: 
+    -12px 10px 30px -8px rgba(0, 0, 0, 0.35),
+    12px 10px 30px -8px rgba(0, 0, 0, 0.35),
+    0 12px 35px rgba(0, 0, 0, 0.35);
 }
+
 
 .card-content {
   display: flex;
@@ -149,14 +149,14 @@ function goTo(section: 'bilancio' | 'proposte' | 'segnalazioni') {
   margin: 0;
   font-size: 2rem;
   font-weight: 700;
-  color: var(--um-white);
+  color: var(--color-text-white);
 }
 
 .card-subtitle {
   margin: 0;
   font-size: 1rem;
   font-weight: 400;
-  color: var(--um-white);
+  color: var(--color-text-white);
 }
 
 @media (max-width: 900px) {
@@ -166,7 +166,7 @@ function goTo(section: 'bilancio' | 'proposte' | 'segnalazioni') {
 
   .home-card {
     border-right: none;
-    border-bottom: 2px dotted var(--um-white);
+    border-bottom: 2px dotted var(--color-text-white);
     height: 30.66vh;
     transition: background-color 0.2s ease;
   }
@@ -174,7 +174,7 @@ function goTo(section: 'bilancio' | 'proposte' | 'segnalazioni') {
   .home-card:hover {
     transform: none;
     box-shadow: none;
-    background: var(--um-orange-soft);
+    background: var(--color-accent-soft);
   }
 
   .home-card:hover .card-icon {
@@ -203,7 +203,7 @@ function goTo(section: 'bilancio' | 'proposte' | 'segnalazioni') {
   }
 }
 
-/* Mobile piccolo */
+
 @media (max-width: 480px) {
   .home-card {
     height: 31vh;
@@ -223,7 +223,7 @@ function goTo(section: 'bilancio' | 'proposte' | 'segnalazioni') {
   }
 }
 
-/* Molto piccolo */
+
 @media (max-width: 360px) {
   .card-content {
     gap: 0.5rem;
