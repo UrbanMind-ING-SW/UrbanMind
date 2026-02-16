@@ -19,6 +19,11 @@ const router = createRouter({
       name: 'budget-operator',
       component: () => import('../views/OperatorBudget.vue')
     },
+    {
+      path: '/proposals',
+      name: 'proposals-operator',
+      component: () => import('../views/OperatorProposals.vue')
+    },
     // Redirect alla pagina degli utenti come home di default
     {
       path: '/',
