@@ -476,7 +476,7 @@ function filterMissions() {
 <style scoped>
 .um-page {
   min-height: 100vh;
-  background: var(--um-white-soft);
+  background: var(--color-background-soft);
   color: var(--color-text);
 }
 
@@ -487,7 +487,7 @@ function filterMissions() {
 .um-hero {
   margin: 10px 18px 0;
   padding: 18px 18px;
-  background: linear-gradient(135deg, var(--um-orange-soft), var(--um-dark-blue));
+  background: var(--gradient-hero);
   border-radius: 12px;
 }
 
@@ -499,14 +499,14 @@ function filterMissions() {
 
 .um-heroTitle {
   margin: 0;
-  color: var(--um-text-white);
+  color: var(--color-text-white);
   font-size: clamp(22px, 3vw, 32px);
   font-weight: 800;
 }
 
 .um-heroSubtitle {
   margin: 6px 0 12px;
-  color: var(--um-text-white);
+  color: var(--color-text-white);
   opacity: 0.9;
   font-size: 0.96rem;
 }
@@ -520,7 +520,7 @@ function filterMissions() {
 .um-actionBtn {
   padding: 9px 16px;
   background: rgba(255, 255, 255, 0.95);
-  color: var(--um-dark-blue);
+  color: var(--color-blue-700);
   border: none;
   border-radius: 10px;
   font-size: 0.88rem;
@@ -593,7 +593,7 @@ function filterMissions() {
   margin: 0 0 14px;
   font-size: 1.1rem;
   font-weight: 800;
-  color: var(--color-heading);
+  color: var(--color-text-heading);
 }
 
 .um-chartWrap {
@@ -601,7 +601,7 @@ function filterMissions() {
   height: 280px;
 }
 
-/* Legenda donut */
+
 .um-legend {
   margin-top: 16px;
   display: flex;
@@ -629,10 +629,10 @@ function filterMissions() {
 
 .um-legendValue {
   font-weight: 800;
-  color: var(--color-heading);
+  color: var(--color-text-heading);
 }
 
-/* Cerchio progress */
+
 .um-progressWrap {
   display: flex;
   flex-direction: column;
@@ -679,7 +679,7 @@ function filterMissions() {
   margin: 0;
   font-size: 1rem;
   font-weight: 700;
-  color: var(--color-heading);
+  color: var(--color-text-heading);
 }
 
 .um-progressDetail {
@@ -688,7 +688,7 @@ function filterMissions() {
   opacity: 0.8;
 }
 
-/* Statistiche */
+
 .um-stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -710,7 +710,7 @@ function filterMissions() {
 .um-statValue {
   font-size: 1.5rem;
   font-weight: 800;
-  color: var(--color-heading);
+  color: var(--color-text-heading);
 }
 
 @media (max-width: 768px) {

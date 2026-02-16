@@ -14,33 +14,41 @@
     </section>
 
     <main class="um-main">
-      <form class="um-form" @submit.prevent="submit">
+      <form class="um-form" @submit.prevent="handleSubmit">
         <div class="um-grid2">
           <div class="um-field">
             <label class="um-label" for="titolo">Titolo</label>
             <input
               id="titolo"
-              v-model.trim="form.titolo"
+              name="titolo"
+              :value="form.titolo"
               class="um-input"
+              :class="{ 'input-error': touched.titolo && errors.titolo }"
               type="text"
               placeholder="Es. Buche sulla strada"
-              required
               maxlength="80"
+              @change="handleChange"
+              @blur="handleBlur"
             />
+            <div v-if="touched.titolo && errors.titolo" class="um-error-text">{{ errors.titolo }}</div>
             <div class="um-hint">{{ form.titolo.length }}/80</div>
           </div>
 
           <div class="um-field">
             <label class="um-label" for="categoria">Categoria</label>
-            <select id="categoria" v-model="form.categoria" class="um-input" required>
+            <select
+              id="categoria"
+              name="categoria"
+              :value="form.categoria"
+              class="um-input"
+              :class="{ 'input-error': touched.categoria && errors.categoria }"
+              @change="handleChange"
+              @blur="handleBlur"
+            >
               <option disabled value="">Seleziona...</option>
-              <option>Strade</option>
-              <option>Illuminazione</option>
-              <option>Rifiuti</option>
-              <option>Verde pubblico</option>
-              <option>Sicurezza</option>
-              <option>Altro</option>
+              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
             </select>
+            <div v-if="touched.categoria && errors.categoria" class="um-error-text">{{ errors.categoria }}</div>
           </div>
         </div>
 
@@ -48,13 +56,17 @@
           <label class="um-label" for="descrizione">Descrizione</label>
           <textarea
             id="descrizione"
-            v-model.trim="form.descrizione"
+            name="descrizione"
+            :value="form.descrizione"
             class="um-textarea"
+            :class="{ 'input-error': touched.descrizione && errors.descrizione }"
             placeholder="Cosa succede? Da quanto tempo? Ci sono rischi per pedoni/auto?"
-            required
             rows="6"
             maxlength="800"
+            @change="handleChange"
+            @blur="handleBlur"
           />
+          <div v-if="touched.descrizione && errors.descrizione" class="um-error-text">{{ errors.descrizione }}</div>
           <div class="um-hint">{{ form.descrizione.length }}/800</div>
         </div>
 
@@ -63,18 +75,29 @@
             <label class="um-label" for="zona">Zona/Indirizzo</label>
             <input
               id="zona"
-              v-model.trim="form.zona"
+              name="zona"
+              :value="form.zona"
               class="um-input"
+              :class="{ 'input-error': touched.zona && errors.zona }"
               type="text"
               placeholder="Es. Via Roma 12, Trento"
-              required
               maxlength="90"
+              @change="handleChange"
+              @blur="handleBlur"
             />
+            <div v-if="touched.zona && errors.zona" class="um-error-text">{{ errors.zona }}</div>
           </div>
 
           <div class="um-field">
             <label class="um-label" for="priorita">Priorità</label>
-            <select id="priorita" v-model="form.priorita" class="um-input" required>
+            <select
+              id="priorita"
+              name="priorita"
+              :value="form.priorita"
+              class="um-input"
+              @change="handleChange"
+              @blur="handleBlur"
+            >
               <option value="bassa">Bassa</option>
               <option value="media">Media</option>
               <option value="alta">Alta</option>
@@ -86,97 +109,109 @@
           <label class="um-label" for="foto">Foto (opzionale)</label>
           <input
             id="foto"
+            name="foto"
             class="um-file"
             type="file"
             accept="image/*"
-            @change="onFileChange"
+            @change="handleFileChange"
           />
           <div v-if="fileName" class="um-hint">Allegato: {{ fileName }}</div>
         </div>
 
         <div class="um-actions">
-          <button class="um-btn um-btnGhost" type="button" @click="cancel" :disabled="submitting">
+          <button class="um-btn um-btnGhost" type="button" @click="cancel" :disabled="isSubmitting">
             Annulla
           </button>
 
-          <button class="um-btn um-btnPrimary" type="submit" :disabled="!isValid || submitting">
-            {{ submitting ? "Invio..." : "Invia segnalazione" }}
+          <button class="um-btn um-btnPrimary" type="submit" :disabled="!isValid || isSubmitting">
+            {{ isSubmitting ? 'Invio...' : 'Invia segnalazione' }}
           </button>
         </div>
 
-        <p v-if="error" class="um-error">{{ error }}</p>
+        <p v-if="submitError" class="um-error">{{ submitError }}</p>
+        <p v-if="submitSuccess" class="um-success">Segnalazione inviata con successo!</p>
       </form>
     </main>
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
-import MainNavbar from "@/components/MainNavbar.vue";
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import MainNavbar from '@/components/MainNavbar.vue'
+import { useReportsStore } from '@/stores/reports'
+import { useForm } from '@/composables/useForm'
+import { newReportSchema, type NewReportFormData } from '@/schemas/forms'
 
-const router = useRouter();
+const router = useRouter()
+const reportsStore = useReportsStore()
+const fileName = ref('')
 
-const submitting = ref(false);
-const error = ref("");
-const fileName = ref("");
+const initialValues: NewReportFormData = {
+  titolo: '',
+  categoria: '',
+  descrizione: '',
+  zona: '',
+  priorita: 'media',
+  foto: null,
+}
 
-const form = ref({
-  titolo: "",
-  categoria: "",
-  descrizione: "",
-  zona: "",
-  priorita: "media",
-  foto: null, // File
-});
+const {
+  form,
+  errors,
+  touched,
+  isSubmitting,
+  submitError,
+  submitSuccess,
+  isValid,
+  handleChange,
+  handleBlur,
+  handleSubmit,
+  reset,
+} = useForm({
+  initialValues,
+  validationSchema: newReportSchema,
+  onSubmit: async (values) => {
+    try {
+      reportsStore.addReport({
+        titolo: values.titolo,
+        descrizione: values.descrizione,
+        categoria: values.categoria,
+        zona: values.zona,
+        priorita: values.priorita,
+        foto: values.foto,
+      })
 
-const isValid = computed(() => {
-  return (
-    form.value.titolo.trim().length >= 6 &&
-    form.value.categoria &&
-    form.value.descrizione.trim().length >= 20 &&
-    form.value.zona.trim().length >= 3 &&
-    form.value.priorita
-  );
-});
+      await new Promise((resolve) => setTimeout(resolve, 600))
+      setTimeout(() => router.push({ name: 'proposals' }), 500)
+    } catch (err) {
+      throw err instanceof Error ? err : new Error('Errore durante l\'invio')
+    }
+  },
+})
 
-function onFileChange(e) {
-  const file = e.target.files?.[0] ?? null;
-  form.value.foto = file;
-  fileName.value = file ? file.name : "";
+const categories = ['Buche', 'Rifiuti', 'Illuminazione', 'Traffico', 'Sicurezza', 'Altro']
+
+function handleFileChange(e: Event) {
+  const target = e.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (file) {
+    form.foto = file
+    fileName.value = file.name
+  }
 }
 
 function cancel() {
-  router.push({ name: "proposals" }); // cambia nome se hai una route "reports"
-}
-
-async function submit() {
-  error.value = "";
-
-  if (!isValid.value) {
-    error.value = "Compila i campi obbligatori (descrizione min 20 caratteri).";
-    return;
-  }
-
-  submitting.value = true;
-  try {
-    // TODO: chiamata API (POST /reports) con FormData se c’è foto
-    // Esempio: const fd = new FormData(); fd.append('foto', form.value.foto)
-    await new Promise((r) => setTimeout(r, 600));
-
-    router.push({ name: "proposals" }); // o route lista segnalazioni
-  } catch (e) {
-    error.value = "Errore durante l’invio. Riprova.";
-  } finally {
-    submitting.value = false;
-  }
+  reset()
+  fileName.value = ''
+  router.push({ name: 'proposals' })
 }
 </script>
 
 <style scoped>
 .um-page {
   min-height: 100vh;
-  background: var(--color-background-mute);
+  background: var(--color-background-soft);
   color: var(--color-text);
 }
 
@@ -187,20 +222,20 @@ async function submit() {
 .um-hero {
   margin: 10px 18px 0;
   padding: 18px 18px;
-  background: linear-gradient(135deg, var(--um-orange-soft), var(--um-dark-blue));
+  background: var(--gradient-hero);
   border-radius: 12px;
 }
 
 .um-heroTitle {
   margin: 0;
-  color: var(--um-text-white);
+  color: var(--color-text-white);
   font-size: clamp(22px, 3vw, 34px);
   font-weight: 800;
 }
 
 .um-heroSubtitle {
   margin-top: 6px;
-  color: var(--um-text-white);
+  color: var(--color-text-white);
   opacity: 0.9;
   font-size: 0.95rem;
 }
@@ -216,7 +251,7 @@ async function submit() {
   border: 1px solid var(--color-border);
   border-radius: 14px;
   padding: 16px;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
 }
 
 .um-grid2 {
@@ -234,35 +269,46 @@ async function submit() {
 
 .um-label {
   font-weight: 800;
-  color: var(--color-heading);
+  color: var(--color-text-heading);
   font-size: 0.95rem;
 }
 
 .um-input,
-.um-textarea {
+.um-textarea,
+.um-file {
   border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 10px 12px;
   background: var(--color-background);
   color: var(--color-text);
   outline: none;
+  transition: border-color var(--transition-base);
+}
+
+.um-input.input-error,
+.um-textarea.input-error {
+  border-color: #dc2626;
 }
 
 .um-textarea {
   resize: vertical;
+  font-family: var(--font-family);
 }
 
 .um-input:focus,
 .um-textarea:focus {
   border-color: var(--color-border-hover);
-  box-shadow: 0 0 0 3px var(--um-divider-dark);
+  box-shadow: 0 0 0 3px var(--color-border-focus);
 }
 
 .um-file {
-  border: 1px dashed var(--color-border);
-  border-radius: 12px;
-  padding: 10px 12px;
-  background: var(--color-background);
+  padding: 8px 12px;
+}
+
+.um-error-text {
+  font-size: 0.82rem;
+  color: #dc2626;
+  font-weight: 600;
 }
 
 .um-hint {
@@ -284,6 +330,7 @@ async function submit() {
   padding: 10px 14px;
   font-weight: 800;
   cursor: pointer;
+  transition: all var(--transition-base);
 }
 
 .um-btn:disabled {
@@ -292,20 +339,36 @@ async function submit() {
 }
 
 .um-btnPrimary {
-  background: var(--um-orange);
-  color: var(--um-text-white);
-  box-shadow: 0 10px 22px rgba(243, 109, 11, 0.22);
+  background: var(--color-accent);
+  color: var(--color-text-white);
+  box-shadow: var(--shadow-md);
+}
+
+.um-btnPrimary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
 .um-btnGhost {
   background: var(--color-background-soft);
-  color: var(--color-heading);
+  color: var(--color-text-heading);
   border: 1px solid var(--color-border);
+}
+
+.um-btnGhost:hover:not(:disabled) {
+  border-color: var(--color-border-hover);
+  background: var(--color-background);
 }
 
 .um-error {
   margin-top: 10px;
   color: #b91c1c;
+  font-weight: 700;
+}
+
+.um-success {
+  margin-top: 10px;
+  color: #065f46;
   font-weight: 700;
 }
 

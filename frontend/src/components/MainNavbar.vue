@@ -8,19 +8,36 @@
         class="um-logo"
       />
     </div>
-    <!-- Titolo centrato -->
-    <h1 class="um-title">UrbanMind</h1>
-    <!-- Utente a destra -->
+    
+    <h1 class="um-title">{{ title }}</h1>
+    
     <div class="um-user">
-      <span class="um-user-label">Cittadino loggato</span>
-      <span class="um-user-name">Nome Utente</span>
+      <span class="um-user-label">{{ userLabel }}</span>
+      <span class="um-user-name">{{ userName }}</span>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+import { computed } from 'vue'
+
+interface Props {
+  title?: string
+  userLabel?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  title: 'UrbanMind',
+  userLabel: 'Cittadino loggato',
+})
+
 const router = useRouter()
+const userStore = useUserStore()
+
+const userName = computed(() => userStore.userName ?? 'Nome Utente')
+
 function goToLogin() {
   router.push('/')
 }
@@ -34,8 +51,8 @@ function goToLogin() {
   width: 100vw;
   align-items: center;
   padding: 0 2rem;
-  background: var(--um-white);
-  color: var(--um-orange);
+  background: var(--color-white);
+  color: var(--color-accent);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
     sans-serif;
   position: relative;
@@ -73,7 +90,7 @@ function goToLogin() {
   letter-spacing: 0.03em;
   justify-self: center;
   text-align: center;
-  color: var(--um-orange);
+  color: var(--color-accent);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -88,20 +105,20 @@ function goToLogin() {
 
 .um-user-label {
   display: block;
-  color: var(--um-medium-gray);
+  color: var(--color-text-secondary);
   font-size: 0.75rem;
 }
 
 .um-user-name {
   font-weight: 600;
-  color: var(--um-orange);
+  color: var(--color-accent);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
 }
 
-/* Tablet (768px e sotto) */
+
 @media (max-width: 768px) {
   .um-header {
     padding: 0 1rem;
@@ -125,7 +142,7 @@ function goToLogin() {
   }
 }
 
-/* Mobile (480px e sotto) */
+
 @media (max-width: 480px) {
   .um-header {
     grid-template-columns: auto 1fr auto;
@@ -149,7 +166,7 @@ function goToLogin() {
 
   .um-user-label {
     font-size: 0.55rem;
-    display: none; /* Nascondi il label su mobile */
+    display: none; 
   }
 
   .um-user-name {
@@ -157,7 +174,7 @@ function goToLogin() {
   }
 }
 
-/* Molto piccolo (sotto 360px) */
+
 @media (max-width: 360px) {
   .um-header {
     padding: 0 0.5rem;

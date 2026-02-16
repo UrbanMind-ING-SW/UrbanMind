@@ -2,212 +2,121 @@
   <div class="um-page">
     <MainNavbar />
     
-    <!-- Top bar -->
     <header class="um-topbar">
       <div class="um-topbar-left">
         <div class="um-search">
           <input
-            v-model="searchQuery"
+            :value="proposalsStore.searchQuery"
             class="um-searchInput"
             type="text"
             placeholder="Cerca proposte, categorie, testo..."
+            @input="(e) => proposalsStore.setSearchQuery((e.target as HTMLInputElement).value)"
           />
         </div>
         <div class="um-filter">
-          <select v-model="sortBy" class="um-filterSelect" aria-label="Ordina">
+          <select
+            :value="proposalsStore.sortBy"
+            class="um-filterSelect"
+            aria-label="Ordina"
+            @change="(e) => proposalsStore.setSortBy((e.target as HTMLSelectElement).value as any)"
+          >
             <option value="recenti">Più recenti</option>
             <option value="voti">Più votate</option>
             <option value="stato">Stato</option>
           </select>
         </div>
       </div>
-
+      <button class="um-primaryBtn" @click="createNewProposal">
+        + Nuova Proposta
+      </button>
     </header>
 
-    <!-- Hero -->
     <section class="um-hero">
       <div class="um-heroText">
         <h2 class="um-heroTitle">Proponi la tua idea al comune</h2>
         <p class="um-heroSubtitle">Cosa ci scriviamo?</p>
       </div>
-
-      <button class="um-primaryBtn" type="button" @click="createProposal">
-        + Nuova proposta
-      </button>
     </section>
 
-    <!-- List -->
-    <main class="um-grid" aria-label="Bacheca proposte">
-      <article
-        v-for="p in sortedProposals"
-        :key="p.id"
-        class="um-proposal"
-        role="button"
-        tabindex="0"
-        @click="openProposal(p.id)"
-        @keydown.enter.prevent="openProposal(p.id)"
-      >
-        <header class="um-proposalHead">
-          <span class="um-chip um-chip--category">{{ p.categoria }}</span>
-          <span class="um-chip" :class="statusClass(p.stato)">{{ labelStato(p.stato) }}</span>
-        </header>
+    <main class="um-main">
+      <div class="um-grid">
+        <article
+          v-for="p in proposalsStore.sortedProposals"
+          :key="p.id"
+          class="um-proposal"
+          tabindex="0"
+          role="button"
+        >
+          <header class="um-proposalHead">
+            <span class="um-chip um-chip--category">{{ p.categoria }}</span>
+            <span class="um-chip" :class="getStatusClass(p.stato)">{{ getLabelStato(p.stato) }}</span>
+          </header>
 
-        <h3 class="um-proposalTitle">{{ p.titolo }}</h3>
-        <p class="um-proposalDesc">{{ p.descrizione }}</p>
+          <h3 class="um-proposalTitle">{{ p.titolo }}</h3>
+          <p class="um-proposalDesc">{{ p.descrizione }}</p>
 
-        <footer class="um-proposalFoot">
-          <span class="um-meta">{{ formatDate(p.data) }}</span>
-          <span class="um-votes" title="Voti">👍 {{ p.voti }}</span>
-        </footer>
-      </article>
+          <footer class="um-proposalFoot">
+            <span class="um-meta">{{ formatDate(p.data) }}</span>
+            <span class="um-votes" title="Voti">👍 {{ p.voti }}</span>
+          </footer>
+        </article>
 
-      <div v-if="sortedProposals.length === 0" class="um-empty">
-        Nessuna proposta trovata.
+        <div v-if="proposalsStore.sortedProposals.length === 0" class="um-empty">
+          Nessuna proposta trovata.
+        </div>
       </div>
     </main>
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from "vue";
-import MainNavbar from "@/components/MainNavbar.vue";
-import { useRouter } from "vue-router";
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+import MainNavbar from '@/components/MainNavbar.vue'
+import { useProposalsStore } from '@/stores/proposals'
 
-const router = useRouter();
+const router = useRouter()
+const proposalsStore = useProposalsStore()
 
-function createProposal() {
-  router.push({ name: "proposal-new" });
+function createNewProposal() {
+  router.push({ name: 'proposal-new' })
 }
 
-
-const searchQuery = ref("");
-const sortBy = ref("recenti");
-
-const proposals = ref([
-  {
-    id: 1,
-    titolo: "Nuova pista ciclabile",
-    descrizione:
-      "Realizzare una pista ciclabile su via principale, con attraversamenti sicuri e segnaletica dedicata.",
-    categoria: "Mobilità",
-    stato: "approvata",
-    data: "2025-12-20",
-    voti: 245,
-  },
-  {
-    id: 2,
-    titolo: "Riqualificazione area verde",
-    descrizione: "Panchine, illuminazione e nuova area giochi nel quartiere nord.",
-    categoria: "Ambiente",
-    stato: "in-valutazione",
-    data: "2025-12-18",
-    voti: 132,
-  },
-  {
-    id: 3,
-    titolo: "Illuminazione pubblica smart",
-    descrizione: "Sostituire i lampioni con LED e sensori per ridurre consumi e aumentare sicurezza.",
-    categoria: "Sicurezza",
-    stato: "in-valutazione",
-    data: "2025-12-15",
-    voti: 89,
-  },
-  {
-    id: 4,
-    titolo: "Wi‑Fi pubblico gratuito",
-    descrizione: "Hotspot nelle piazze principali e nei pressi di scuole e uffici comunali.",
-    categoria: "Tecnologia",
-    stato: "approvata",
-    data: "2025-12-10",
-    voti: 312,
-  },
-  {
-    id: 5,
-    titolo: "Centro sportivo polivalente",
-    descrizione: "Spazi modulari per sport indoor e attività per giovani e famiglie.",
-    categoria: "Sport",
-    stato: "respinta",
-    data: "2025-12-05",
-    voti: 56,
-  },
-  {
-    id: 6,
-    titolo: "Biblioteca: orari estesi",
-    descrizione: "Estendere l’apertura serale e introdurre postazioni studio prenotabili.",
-    categoria: "Cultura",
-    stato: "approvata",
-    data: "2025-12-01",
-    voti: 178,
-  },
-]);
-
-const filteredProposals = computed(() => {
-  const q = searchQuery.value.trim().toLowerCase();
-  if (!q) return proposals.value;
-
-  return proposals.value.filter((p) => {
-    return (
-      p.titolo.toLowerCase().includes(q) ||
-      p.descrizione.toLowerCase().includes(q) ||
-      p.categoria.toLowerCase().includes(q) ||
-      p.stato.toLowerCase().includes(q)
-    );
-  });
-});
-
-const sortedProposals = computed(() => {
-  const arr = [...filteredProposals.value];
-
-  if (sortBy.value === "voti") {
-    return arr.sort((a, b) => b.voti - a.voti);
-  }
-
-  if (sortBy.value === "stato") {
-    const order = { "in-valutazione": 0, approvata: 1, respinta: 2 };
-    return arr.sort((a, b) => (order[a.stato] ?? 99) - (order[b.stato] ?? 99));
-  }
-
-  // recenti (ISO date string)
-  return arr.sort((a, b) => (a.data < b.data ? 1 : -1));
-});
-
-
-function labelStato(stato) {
-  if (stato === "in-valutazione") return "In valutazione";
-  if (stato === "approvata") return "Approvata";
-  if (stato === "respinta") return "Respinta";
-  return stato;
+function formatDate(iso: string): string {
+  const [y, m, d] = iso.split('-')
+  return `${d}/${m}/${y}`
 }
 
-function statusClass(stato) {
+function getLabelStato(stato: string): string {
+  const labels: Record<string, string> = {
+    'in-valutazione': 'In valutazione',
+    approvata: 'Approvata',
+    respinta: 'Respinta',
+  }
+  return labels[stato] || stato
+}
+
+function getStatusClass(stato: string) {
   return {
-    "um-chip--ok": stato === "approvata",
-    "um-chip--wait": stato === "in-valutazione",
-    "um-chip--no": stato === "respinta",
-  };
-}
-
-function formatDate(iso) {
-  // YYYY-MM-DD -> DD/MM/YYYY
-  const [y, m, d] = iso.split("-");
-  return `${d}/${m}/${y}`;
+    'um-chip--ok': stato === 'approvata',
+    'um-chip--wait': stato === 'in-valutazione',
+    'um-chip--no': stato === 'respinta',
+  }
 }
 </script>
 
 <style scoped>
 .um-page {
   min-height: 100vh;
-  background: var(--um-white-soft);
+  background: var(--color-background-soft);
   color: var(--color-text);
 }
 
-/* Topbar */
 .um-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px;
-  gap: 14px;
+  padding: var(--spacing-xl) var(--spacing-xl);
+  gap: var(--spacing-xl);
 }
 
 .um-topbar-left {
@@ -216,7 +125,6 @@ function formatDate(iso) {
   gap: 12px;
   min-width: 0;
 }
-
 
 .um-search {
   width: clamp(160px, 28vw, 420px);
@@ -245,57 +153,58 @@ function formatDate(iso) {
 .um-filterSelect:focus,
 .um-searchInput:focus {
   border-color: var(--color-border-hover);
-  box-shadow: 0 0 0 3px var(--um-divider-dark);
-}
-
-
-/* Hero */
-.um-hero {
-  margin: 10px 18px 0;
-  padding: 18px 18px;
-  background: linear-gradient(135deg, var(--um-orange-soft), var(--um-dark-blue));
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-}
-
-.um-heroTitle {
-  margin: 0;
-  color: var(--um-text-white);
-  font-size: clamp(22px, 3vw, 40px);
-  font-weight: 800;
-  text-align: left;
-}
-
-.um-heroSubtitle {
-  margin-top: 6px;
-  color: var(--um-text-white);
-  opacity: 0.9;
-  font-size: 0.95rem;
+  box-shadow: 0 0 0 3px var(--color-border-focus);
 }
 
 .um-primaryBtn {
   border: 0;
-  background: var(--um-white);
-  color: var(--um-orange);
+  background: var(--color-white);
+  color: var(--color-accent);
   font-weight: 700;
   padding: 10px 14px;
   border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
 }
 
-/* Grid */
+.um-primaryBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.um-hero {
+  margin: 10px 18px 0;
+  padding: 18px 18px;
+  background: var(--gradient-hero);
+  border-radius: 12px;
+}
+
+.um-heroTitle {
+  margin: 0;
+  color: var(--color-text-white);
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 800;
+}
+
+.um-heroSubtitle {
+  margin-top: 6px;
+  color: var(--color-text-white);
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
+
+.um-main {
+  padding: 16px 18px;
+}
+
 .um-grid {
-  padding: 16px 18px 28px;
+  padding: 16px 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
 }
 
-/* Proposal card (glass + border) */
 .um-proposal {
   background: var(--color-background);
   border: 1px solid var(--color-border);
@@ -305,23 +214,22 @@ function formatDate(iso) {
   display: flex;
   flex-direction: column;
   min-height: 190px;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
   transform: translateY(0);
   transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
 }
 
 .um-proposal:hover {
   transform: translateY(-3px);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
-  border-color: var(--um-orange-light);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-orange-400);
 }
 
 .um-proposal:focus {
   outline: none;
-  box-shadow: 0 0 0 3px var(--um-divider-dark), 0 14px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 0 0 3px var(--color-border-focus), 0 14px 30px rgba(0, 0, 0, 0.12);
 }
 
-/* Head */
 .um-proposalHead {
   display: flex;
   align-items: center;
@@ -342,8 +250,8 @@ function formatDate(iso) {
 }
 
 .um-chip--category {
-  color: var(--um-dark-blue);
-  border-color: var(--um-divider-dark);
+  color: var(--color-blue-500);
+  border-color: var(--color-border-focus);
 }
 
 .um-chip--ok {
@@ -364,12 +272,11 @@ function formatDate(iso) {
   color: #7f1d1d;
 }
 
-/* Body */
 .um-proposalTitle {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 800;
-  color: var(--color-heading);
+  color: var(--color-text-heading);
 }
 
 .um-proposalDesc {
@@ -378,75 +285,64 @@ function formatDate(iso) {
   color: var(--color-text);
   opacity: 0.95;
   line-height: 1.5;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  flex: 1;
 }
 
-/* Footer */
 .um-proposalFoot {
   margin-top: auto;
-  padding-top: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  padding-top: 10px;
   border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
 }
 
 .um-meta {
-  font-size: 0.85rem;
-  opacity: 0.85;
+  color: var(--color-text-secondary);
+  font-weight: 600;
 }
 
 .um-votes {
   font-size: 0.9rem;
   font-weight: 800;
-  color: var(--um-orange);
+  color: var(--color-accent);
 }
 
-/* Empty state */
 .um-empty {
   grid-column: 1 / -1;
-  padding: 18px;
-  border-radius: 14px;
-  border: 1px dashed var(--color-border);
-  background: var(--color-background);
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--color-text-secondary);
+  font-size: 1.1rem;
 }
 
-/* Responsive */
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .um-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 640px) {
   .um-topbar {
     flex-direction: column;
-    align-items: stretch;
+    gap: 10px;
   }
 
-  .um-hero {
-    flex-direction: column;
-    align-items: stretch;
+  .um-topbar-left {
+    width: 100%;
   }
+
+  .um-search {
+    width: 100%;
+  }
+
   .um-primaryBtn {
     width: 100%;
   }
+
   .um-grid {
     grid-template-columns: 1fr;
-  }
-}
-
-
-@media (prefers-reduced-motion: reduce) {
-  .um-proposal,
-  .um-primaryBtn {
-    transition: none;
-  }
-  .um-proposal:hover {
-    transform: none;
   }
 }
 </style>
