@@ -14,11 +14,16 @@ const router = createRouter({
       name: 'reports-operator',
       component: () => import('../views/OperatorReports.vue')
     },
-    // Se vuoi che la pagina iniziale sia una delle due, puoi aggiungere un redirect:
+    {
+      path: '/budgets',
+      name: 'budget-operator',
+      component: () => import('../views/OperatorBudget.vue')
+    },
+    // Redirect alla pagina degli utenti come home di default
     {
       path: '/',
       redirect: '/users'
-    }
+    },
   ],
 })
 
