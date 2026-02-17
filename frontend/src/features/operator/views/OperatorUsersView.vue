@@ -78,8 +78,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import Sidebar from '../components/Sidebar.vue'
-import MainNavbar from '../components/MainNavbar.vue'
+import Sidebar from '@/components/Sidebar.vue'
+import MainNavbar from '@/components/MainNavbar.vue'
 
 const router = useRouter()
 const q = ref('')
@@ -92,11 +92,11 @@ const handleMenuClick = (label) => {
   
   // Mapping delle label ai percorsi
   const routeMap = {
-    'Dashboard': '/home',
-    'Segnalazioni': '/reports',
-    'Bilanci': '/budgets',
-    'Proposte': '/proposals',
-    'Utenti': '/users'
+    'Dashboard': '/operator/dashboard',
+    'Segnalazioni': '/operator/reports',
+    'Bilanci': '/operator/budgets',
+    'Proposte': '/operator/proposals',
+    'Utenti': '/operator/users'
   }
   
   const path = routeMap[label]

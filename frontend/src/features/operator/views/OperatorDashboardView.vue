@@ -86,11 +86,11 @@ const handleMenuClick = (label: string) => {
   
   // Mapping delle label ai percorsi
   const routeMap: Record<string, string> = {
-    'Dashboard': '/home',
-    'Segnalazioni': '/reports',
-    'Bilanci': '/budgets',
-    'Proposte': '/proposals',
-    'Utenti': '/users'
+    'Dashboard': '/operator/dashboard',
+    'Segnalazioni': '/operator/reports',
+    'Bilanci': '/operator/budgets',
+    'Proposte': '/operator/proposals',
+    'Utenti': '/operator/users'
   };
   
   const path = routeMap[label];

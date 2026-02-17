@@ -12,7 +12,7 @@
       >
         <div class="card-content">
           <div class="card-icon">
-            <img src="../assets/Bilancio.svg" alt="Grafici" />
+            <img src="@/assets/Bilancio.svg" alt="Grafici" />
           </div>
           <h2 class="card-title">Bilancio</h2>
           <p class="card-subtitle">Consulta il bilancio del nostro comune</p>
@@ -29,7 +29,7 @@
       >
         <div class="card-content">
           <div class="card-icon">
-            <img src="../assets/Proposte.svg" alt="Proposte" />
+            <img src="@/assets/Proposte.svg" alt="Proposte" />
           </div>
           <h2 class="card-title">Proposte</h2>
           <p class="card-subtitle">Proponi la tua idea</p>
@@ -46,7 +46,7 @@
       >
         <div class="card-content">
           <div class="card-icon">
-            <img src="../assets/Segnalazioni.svg" alt="Segnalazioni" />
+            <img src="@/assets/Segnalazioni.svg" alt="Segnalazioni" />
           </div>
           <h2 class="card-title">Segnalazioni</h2>
           <p class="card-subtitle">Segnala i problemi</p>

@@ -123,7 +123,7 @@ import {
   Title,
 } from "chart.js";
 import { Doughnut, Bar, Line } from "vue-chartjs";
-import MainNavbar from "../components/MainNavbar.vue";
+import MainNavbar from '@/components/MainNavbar.vue'
 
 /* ============ QUANDO USI API: AGGIUNGI QUESTI IMPORT ============ */
 // import { onMounted } from "vue";

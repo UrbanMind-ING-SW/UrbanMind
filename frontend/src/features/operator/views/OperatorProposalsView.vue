@@ -132,8 +132,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import MainNavbar from '../components/MainNavbar.vue'
-import Sidebar from '../components/Sidebar.vue'
+import MainNavbar from '@/components/MainNavbar.vue'
+import Sidebar from '@/components/Sidebar.vue'
 
 const router = useRouter()
 const activePage = ref('Proposte')
@@ -147,11 +147,11 @@ const handleMenuClick = (label: string) => {
   
   // Mapping delle label ai percorsi
   const routeMap: Record<string, string> = {
-    'Dashboard': '/home',
-    'Segnalazioni': '/reports',
-    'Bilanci': '/budgets',
-    'Proposte': '/proposals',
-    'Utenti': '/users'
+    'Dashboard': '/operator/dashboard',
+    'Segnalazioni': '/operator/reports',
+    'Bilanci': '/operator/budgets',
+    'Proposte': '/operator/proposals',
+    'Utenti': '/operator/users'
   }
   
   const path = routeMap[label]
