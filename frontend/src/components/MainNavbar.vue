@@ -9,21 +9,38 @@
       />
     </div>
 
-    <!-- Titolo centrato -->
-    <h1 class="um-title">UrbanMind</h1>
 
-    <!-- Utente a destra -->
+
+    
+    <h1 class="um-title">{{ title }}</h1>
+    
     <div class="um-user">
-      <span class="um-user-label">Cittadino loggato</span>
-      <span class="um-user-name">Nome Utente</span>
+      <span class="um-user-label">{{ userLabel }}</span>
+      <span class="um-user-name">{{ userName }}</span>
+
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+import { computed } from 'vue'
+
+interface Props {
+  title?: string
+  userLabel?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  title: 'UrbanMind',
+  userLabel: 'Cittadino loggato',
+})
 
 const router = useRouter()
+const userStore = useUserStore()
+
+const userName = computed(() => userStore.userName ?? 'Nome Utente')
 
 function goToLogin() {
   router.push('/')
@@ -37,22 +54,28 @@ function goToLogin() {
   height: 10vh;
   width: 100vw;
   align-items: center;
-  padding: 0 2rem; 
+  padding: 0 2rem;
   background: var(--color-white);
-  color: var(--color-orange-600);
+  color: var(--color-accent);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
     sans-serif;
   position: relative;
   z-index: 10;
   box-shadow: var(--shadow-sm);
+  gap: 1rem;
+
+  border-bottom: 1px solid var(--color-border);
+
 }
 
 .um-brand {
   display: flex;
   align-items: center;
   cursor: pointer;
-  transition: opacity var(--transition-base);
+  transition: opacity 0.2s ease;
   justify-self: start;
+  min-width: 0;
+
 }
 
 .um-brand:hover {
@@ -60,35 +83,118 @@ function goToLogin() {
 }
 
 .um-logo {
-  height: 10vh;
+  height: 8vh;
   width: auto;
   object-fit: contain;
 }
 
 .um-title {
   margin: 0;
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-xl);
+  font-weight: 700;
+  font-size: 1.4rem;
   letter-spacing: 0.03em;
-  justify-self: center; 
+  justify-self: center;
   text-align: center;
-  color: var(--color-orange-600);
+  color: var(--color-accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .um-user {
   text-align: right;
-  font-size: var(--font-size-sm);
+  font-size: 0.9rem;
   justify-self: end;
+  min-width: 0;
 }
 
 .um-user-label {
   display: block;
-  color: var(--color-gray-500);
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
 }
 
 .um-user-name {
-  font-weight: var(--font-weight-bold);
-  color: var(--color-orange-600);
+  font-weight: 600;
+  color: var(--color-accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+
+@media (max-width: 768px) {
+  .um-header {
+    padding: 0 1rem;
+    height: 8vh;
+  }
+
+  .um-logo {
+    height: 6vh;
+  }
+
+  .um-title {
+    font-size: 1.1rem;
+  }
+
+  .um-user {
+    font-size: 0.8rem;
+  }
+
+  .um-user-label {
+    font-size: 0.65rem;
+  }
+}
+
+
+@media (max-width: 480px) {
+  .um-header {
+    grid-template-columns: auto 1fr auto;
+    padding: 0 0.75rem;
+    height: 7vh;
+    gap: 0.5rem;
+  }
+
+  .um-logo {
+    height: 5vh;
+  }
+
+  .um-title {
+    font-size: 0.9rem;
+  }
+
+  .um-user {
+    font-size: 0.7rem;
+    text-align: center;
+  }
+
+  .um-user-label {
+    font-size: 0.55rem;
+    display: none; 
+  }
+
+  .um-user-name {
+    font-size: 0.7rem;
+  }
+}
+
+
+@media (max-width: 360px) {
+  .um-header {
+    padding: 0 0.5rem;
+  }
+
+  .um-logo {
+    height: 4vh;
+  }
+
+  .um-title {
+    font-size: 0.8rem;
+  }
+
+  .um-user-name {
+    font-size: 0.65rem;
+  }
 }
 </style>
-

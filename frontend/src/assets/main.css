@@ -17,7 +17,9 @@
   --color-black: #000000;
 
   /* Primary - Blue */
+
   --color-blue-300: #D9EEF2;
+
   --color-blue-500: #3483d3;
   --color-blue-700: #68aaeb;
 
@@ -213,4 +215,5 @@ body {
 
 .rounded-lg {
   border-radius: var(--radius-lg);
+
 }
