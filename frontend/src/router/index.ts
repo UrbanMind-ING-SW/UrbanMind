@@ -7,7 +7,7 @@ const router = createRouter({
     {     
       path: '/home',
       name: 'home-operator',
-      component: () => import('../views/OperatorHomepage.vue')
+      component: () => import('../views/operatorHomepage.vue')
     },
     { 
       path: '/users',

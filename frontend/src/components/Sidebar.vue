@@ -67,7 +67,7 @@ const menuItems = ref([
 .um-sidebar {
   width: 250px; 
   background-color: #1a202c; 
-  color: var(--um-white);
+  color: var(--color-white);
   display: flex;
   flex-direction: column;
   height: 100%; 
@@ -82,13 +82,13 @@ const menuItems = ref([
 .um-nav-link {
   display: flex;
   align-items: center;
-  padding: 1rem 1.5rem;
-  color: var(--um-white);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  color: var(--color-white);
   text-decoration: none;
-  font-size: 1.1rem;
-  font-weight: 500;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
   border-left: 4px solid transparent;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
   cursor: pointer;
 }
 
@@ -98,17 +98,17 @@ const menuItems = ref([
 
 /* LOGICA ATTIVA AGGIORNATA */
 .um-nav-link.active {
-  color: var(--um-orange); 
-  border-left-color: var(--um-orange);
+  color: var(--color-orange-600); 
+  border-left-color: var(--color-orange-600);
   background-color: rgba(255, 255, 255, 0.05);
-  font-weight: 700;
+  font-weight: var(--font-weight-black);
 }
 
 .icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 15px;
+  margin-right: var(--spacing-xl);
   width: 24px;
   height: 24px;
 }

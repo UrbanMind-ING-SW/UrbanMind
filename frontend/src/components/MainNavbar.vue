@@ -38,19 +38,20 @@ function goToLogin() {
   width: 100vw;
   align-items: center;
   padding: 0 2rem; 
-  background: var(--um-white-soft);
-  color: var(--um-orange);
+  background: var(--color-white);
+  color: var(--color-orange-600);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
     sans-serif;
   position: relative;
   z-index: 10;
+  box-shadow: var(--shadow-sm);
 }
 
 .um-brand {
   display: flex;
   align-items: center;
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--transition-base);
   justify-self: start;
 }
 
@@ -66,28 +67,28 @@ function goToLogin() {
 
 .um-title {
   margin: 0;
-  font-weight: 700;
-  font-size: 1.4rem;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-xl);
   letter-spacing: 0.03em;
   justify-self: center; 
   text-align: center;
-  color: var(--um-orange);
+  color: var(--color-orange-600);
 }
 
 .um-user {
   text-align: right;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
   justify-self: end;
 }
 
 .um-user-label {
   display: block;
-  color: var(--um-medium-gray);
+  color: var(--color-gray-500);
 }
 
 .um-user-name {
-  font-weight: 600;
-  color: var(--um-orange);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-orange-600);
 }
 </style>
 
