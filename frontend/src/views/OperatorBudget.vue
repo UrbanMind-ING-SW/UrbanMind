@@ -75,9 +75,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import MainNavbar from '../components/MainNavbar.vue'
 import Sidebar from '../components/Sidebar.vue'
 
+const router = useRouter()
 const activePage = ref('Bilanci')
 const fileInput = ref<HTMLInputElement | null>(null)
 
@@ -95,7 +97,20 @@ const steps = ref<Step[]>([
 
 const handleMenuClick = (label: string) => {
   activePage.value = label
-  console.log('Navigated to:', label)
+  
+  // Mapping delle label ai percorsi
+  const routeMap: Record<string, string> = {
+    'Dashboard': '/home',
+    'Segnalazioni': '/reports',
+    'Bilanci': '/budgets',
+    'Proposte': '/proposals',
+    'Utenti': '/users'
+  };
+  
+  const path = routeMap[label];
+  if (path) {
+    router.push(path);
+  }
 }
 
 const handleFileSelect = (event: Event) => {
@@ -144,8 +159,8 @@ const proceedToNextStep = () => {
 .um-content {
   flex: 1;
   overflow-y: auto;
-  background-color: var(--um-white-soft);
-  padding: 2rem;
+  background-color: var(--color-background-soft);
+  padding: var(--spacing-2xl);
 }
 
 .um-content-wrapper {
@@ -160,15 +175,15 @@ const proceedToNextStep = () => {
 }
 
 .um-page-title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--um-dark-blue);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-blue-500);
   margin: 0 0 0.5rem 0;
 }
 
 .um-page-subtitle {
-  font-size: 0.95rem;
-  color: var(--um-medium-gray);
+  font-size: var(--font-size-base);
+  color: var(--color-gray-500);
   margin: 0;
 }
 
@@ -191,54 +206,54 @@ const proceedToNextStep = () => {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: var(--um-light-gray);
-  border: 2px solid var(--um-divider-light);
+  background-color: var(--color-gray-100);
+  border: 2px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  color: var(--um-medium-gray);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-500);
   font-size: 1.1rem;
 }
 
 .um-step.active .um-step-number {
-  background-color: var(--um-orange);
-  color: var(--um-white);
-  border-color: var(--um-orange);
+  background-color: var(--color-orange-600);
+  color: var(--color-white);
+  border-color: var(--color-orange-600);
 }
 
 .um-step.completed .um-step-number {
-  background-color: var(--um-dark-blue);
-  color: var(--um-white);
-  border-color: var(--um-dark-blue);
+  background-color: var(--color-blue-500);
+  color: var(--color-white);
+  border-color: var(--color-blue-500);
 }
 
 .um-step-label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--um-medium-gray);
+  color: var(--color-gray-500);
 }
 
 .um-step.active .um-step-label {
-  color: var(--um-orange);
+  color: var(--color-orange-600);
 }
 
 /* Upload Section */
 .um-upload-section {
-  background-color: var(--um-white);
-  border-radius: 8px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  background-color: var(--color-white);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-2xl);
+  margin-bottom: var(--spacing-2xl);
+  box-shadow: var(--shadow-sm);
 }
 
 .um-upload-area {
-  border: 2px dashed var(--um-orange);
-  border-radius: 6px;
+  border: 2px dashed var(--color-orange-600);
+  border-radius: var(--radius-xs);
   padding: 3rem 2rem;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -247,19 +262,19 @@ const proceedToNextStep = () => {
 
 .um-upload-area:hover {
   background-color: rgba(243, 109, 11, 0.05);
-  border-color: var(--um-orange-soft);
+  border-color: var(--color-orange-400);
 }
 
 .um-upload-icon {
   width: 48px;
   height: 48px;
-  color: var(--um-orange);
+  color: var(--color-orange-600);
 }
 
 .um-upload-text {
   font-size: 1.05rem;
   font-weight: 600;
-  color: var(--um-dark-blue);
+  color: var(--color-blue-500);
   margin: 0;
 }
 
@@ -278,23 +293,23 @@ const proceedToNextStep = () => {
 .um-button {
   padding: 0.75rem 2rem;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 .um-button-primary {
-  background-color: var(--um-orange);
-  color: var(--um-white);
+  background-color: var(--color-orange-600);
+  color: var(--color-white);
 }
 
 .um-button-primary:hover {
-  background-color: var(--um-orange-soft);
+  background-color: var(--color-orange-400);
   transform: translateX(2px);
 }
 
@@ -311,13 +326,13 @@ const proceedToNextStep = () => {
 .um-progress-indicator {
   display: flex;
   justify-content: center;
-  margin-top: 2rem;
+  margin-top: var(--spacing-2xl);
 }
 
 .um-progress-bar {
   width: 100px;
   height: 4px;
-  background-color: var(--um-divider-light);
+  background-color: var(--color-border);
   border-radius: 2px;
   overflow: hidden;
 }
@@ -327,7 +342,7 @@ const proceedToNextStep = () => {
   display: block;
   height: 100%;
   width: 33%;
-  background-color: var(--um-orange);
+  background-color: var(--color-orange-600);
   animation: progress 1.5s ease-in-out;
 }
 

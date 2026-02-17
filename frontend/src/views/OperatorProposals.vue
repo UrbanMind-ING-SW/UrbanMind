@@ -5,7 +5,7 @@
 
     <!-- Main Content con Sidebar -->
     <div class="content-wrapper">
-      <Sidebar :activePage="'Proposte'" />
+      <Sidebar :activePage="activePage" @menu-click="handleMenuClick" />
 
       <!-- Contenuto Principale -->
       <main class="proposals-content">
@@ -131,12 +131,34 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import MainNavbar from '../components/MainNavbar.vue'
 import Sidebar from '../components/Sidebar.vue'
+
+const router = useRouter()
+const activePage = ref('Proposte')
 
 // Stato dei filtri
 const selectedStatus = ref('')
 const selectedCategory = ref('')
+
+const handleMenuClick = (label: string) => {
+  activePage.value = label
+  
+  // Mapping delle label ai percorsi
+  const routeMap: Record<string, string> = {
+    'Dashboard': '/home',
+    'Segnalazioni': '/reports',
+    'Bilanci': '/budgets',
+    'Proposte': '/proposals',
+    'Utenti': '/users'
+  }
+  
+  const path = routeMap[label]
+  if (path) {
+    router.push(path)
+  }
+}
 
 // Dati proposte
 const proposals = ref([
@@ -224,7 +246,7 @@ const viewDetails = (id: number) => {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #f5f5f5;
+  background-color: var(--color-background-soft);
 }
 
 /* Wrapper per Sidebar e Content */
@@ -262,9 +284,9 @@ const viewDetails = (id: number) => {
   align-items: center;
   gap: 1rem;
   margin-bottom: 2rem;
-  background: var(--um-white-soft);
+  background: #f9f9f9;
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 }
 
 .filter-label {
@@ -280,21 +302,21 @@ const viewDetails = (id: number) => {
 .filter-select {
   padding: 0.5rem 1rem;
   border: 1px solid #d0d0d0;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   background-color: white;
   color: #1a202c;
-  font-size: 0.95rem;
+  font-size: var(--font-size-base);
   cursor: pointer;
-  transition: border-color 0.3s ease;
+  transition: border-color var(--transition-base);
 }
 
 .filter-select:hover {
-  border-color: #ff8c00;
+  border-color: var(--color-orange-600);
 }
 
 .filter-select:focus {
   outline: none;
-  border-color: #ff8c00;
+  border-color: var(--color-orange-600);
   box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.1);
 }
 
@@ -310,10 +332,10 @@ const viewDetails = (id: number) => {
   display: flex;
   gap: 1.5rem;
   background: white;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
 }
 
 .proposal-card:hover {
@@ -329,7 +351,7 @@ const viewDetails = (id: number) => {
   justify-content: center;
   width: 80px;
   height: 80px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background-color: #f0f0f0;
   font-size: 2.5rem;
 }
@@ -370,11 +392,11 @@ const viewDetails = (id: number) => {
 
 .category-badge {
   background-color: #fff3e0;
-  color: #ff8c00;
-  padding: 0.25rem 0.75rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  color: var(--color-orange-600);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.5px;
 }
 
@@ -426,7 +448,7 @@ const viewDetails = (id: number) => {
   align-items: center;
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--color-border);
 }
 
 .status-container {
@@ -443,9 +465,9 @@ const viewDetails = (id: number) => {
 
 .status-badge {
   padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   white-space: nowrap;
 }
 
@@ -480,11 +502,11 @@ const viewDetails = (id: number) => {
 .btn {
   padding: 0.5rem 1rem;
   border: none;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
   white-space: nowrap;
 }
 

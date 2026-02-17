@@ -3,7 +3,7 @@
     <MainNavbar />
 
     <div class="dashboard-container">
-      <Sidebar activePage="Segnalazioni" />
+      <Sidebar :activePage="activePage" @menu-click="handleMenuClick" />
 
       <main class="um-main">
         
@@ -76,11 +76,33 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import MainNavbar from '@/components/MainNavbar.vue'
 import Sidebar from '@/components/Sidebar.vue'
 
+const router = useRouter();
+const activePage = ref('Segnalazioni');
+
 // Stato della pratica (collegato alla select)
 const currentStatus = ref('Nuova');
+
+const handleMenuClick = (label: string) => {
+  activePage.value = label;
+  
+  // Mapping delle label ai percorsi
+  const routeMap: Record<string, string> = {
+    'Dashboard': '/home',
+    'Segnalazioni': '/reports',
+    'Bilanci': '/budgets',
+    'Proposte': '/proposals',
+    'Utenti': '/users'
+  };
+  
+  const path = routeMap[label];
+  if (path) {
+    router.push(path);
+  }
+};
 
 </script>
 
@@ -99,15 +121,15 @@ const currentStatus = ref('Nuova');
   display: flex;
   flex: 1;
   overflow: hidden;
-  background-color: var(--um-light-gray);
-  border-top: 1px solid var(--um-divider-light);
+  background-color: var(--color-background-soft);
+  border-top: 1px solid var(--color-border);
 }
 
 .um-main {
   flex-grow: 1;
-  padding: 2rem;
+  padding: var(--spacing-2xl);
   overflow-y: auto;
-  background-color: var(--um-white-soft);
+  background-color: var(--color-background-soft);
 }
 
 /* --- GRIGLIA DETTAGLIO --- */
@@ -127,10 +149,10 @@ const currentStatus = ref('Nuova');
 
 /* --- CARD STYLES --- */
 .um-card {
-  background: var(--um-white);
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  border: 1px solid var(--um-divider-light);
+  background: var(--color-white);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
   overflow: hidden;
 }
 
@@ -152,10 +174,10 @@ const currentStatus = ref('Nuova');
   position: absolute;
   bottom: 10px;
   right: 10px;
-  background-color: var(--um-white);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
+  background-color: var(--color-white);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-xs);
   color: #666;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
@@ -174,27 +196,27 @@ const currentStatus = ref('Nuova');
 
 .report-title {
   font-size: 1.4rem;
-  color: var(--um-text-primary); /* Blu scuro */
-  font-weight: 700;
+  color: var(--color-text-heading);
+  font-weight: var(--font-weight-bold);
   margin: 0;
 }
 
 .report-description {
-  color: var(--um-text-secondary); /* Grigio */
+  color: var(--color-text-secondary);
   margin-bottom: 2rem;
   line-height: 1.5;
 }
 
 /* Badge Stato (Stile "Nuova") */
 .status-badge {
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 0.8rem;
-  font-weight: 700;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
 }
 .badge-new {
-  background-color: rgba(0, 103, 208, 0.15); /* Blu chiaro */
-  color: var(--um-dark-blue);
+  background-color: rgba(0, 103, 208, 0.15);
+  color: var(--color-blue-500);
 }
 
 /* Allegati */
@@ -222,19 +244,19 @@ const currentStatus = ref('Nuova');
 .widget-card {
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  border-top: 3px solid var(--um-orange); /* Linea arancione in alto come nel mockup */
+  border-top: 3px solid var(--color-orange-600);
 }
 
 .widget-title {
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: #333;
   margin-bottom: 1rem;
 }
 
 .sub-title {
-  color: var(--um-text-secondary);
-  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
 }
 
 .form-group {
@@ -251,11 +273,11 @@ const currentStatus = ref('Nuova');
 .um-select {
   width: 100%;
   padding: 0.6rem;
-  border: 1px solid var(--um-divider-light);
-  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
   font-size: 0.95rem;
   color: #333;
-  background-color: var(--um-white);
+  background-color: var(--color-white);
 }
 
 .full-width {
@@ -264,17 +286,17 @@ const currentStatus = ref('Nuova');
 
 /* Bottone Arancione */
 .um-btn-primary {
-  background-color: var(--um-orange);
-  color: var(--um-white);
+  background-color: var(--color-orange-600);
+  color: var(--color-white);
   border: none;
   padding: 0.7rem 1rem;
-  border-radius: 4px;
-  font-weight: 600;
+  border-radius: var(--radius-xs);
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--transition-base);
 }
 .um-btn-primary:hover {
-  background-color: var(--um-orange-soft);
+  background-color: var(--color-orange-400);
 }
 
 /* Utente */

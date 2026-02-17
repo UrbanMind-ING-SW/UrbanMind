@@ -4,7 +4,7 @@
 
     <div class="dashboard-container">
       
-      <Sidebar />
+      <Sidebar :activePage="activePage" @menu-click="handleMenuClick" />
 
       <main class="um-main">
         
@@ -74,8 +74,30 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import MainNavbar from '@/components/MainNavbar.vue'
 import Sidebar from '@/components/Sidebar.vue'
+
+const router = useRouter();
+const activePage = ref('Dashboard');
+
+const handleMenuClick = (label: string) => {
+  activePage.value = label;
+  
+  // Mapping delle label ai percorsi
+  const routeMap: Record<string, string> = {
+    'Dashboard': '/home',
+    'Segnalazioni': '/reports',
+    'Bilanci': '/budgets',
+    'Proposte': '/proposals',
+    'Utenti': '/users'
+  };
+  
+  const path = routeMap[label];
+  if (path) {
+    router.push(path);
+  }
+};
 
 // Dati Simulati KPI
 const stats = ref([
@@ -122,8 +144,8 @@ const reports = ref([
   display: flex;
   flex: 1; /* Questo è il trucco: occupa tutto lo spazio verticale rimanente sotto la navbar */
   overflow: hidden; /* Tiene lo scroll dentro questo contenitore se necessario */
-  background-color: var(--um-white-soft);
-  border-top: 1px solid var(--um-divider-light);
+  background-color: var(--color-background-soft);
+  border-top: 1px solid var(--color-border);
 }
 
 /* --- SIDEBAR --- */
@@ -139,25 +161,26 @@ const reports = ref([
 /* --- MAIN CONTENT --- */
 .um-main {
   flex-grow: 1; /* Occupa tutto lo spazio a destra della sidebar */
-  padding: 2rem;
+  padding: var(--spacing-2xl);
   overflow-y: auto; /* Abilita lo scroll solo per il contenuto centrale */
   height: 100%; /* Assicura che usi l'altezza del genitore */
+  background-color: var(--color-background-soft);
 }
 
 /* --- KPI CARDS GRID --- */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-2xl);
 }
 
 .um-card {
-  background: var(--um-white);
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  padding: 1.5rem;
-  border: 1px solid var(--um-divider-light);
+  background: var(--color-white);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-xl);
+  border: 1px solid var(--color-border);
 }
 
 .kpi-card {
@@ -167,30 +190,30 @@ const reports = ref([
 }
 
 .kpi-value {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--um-medium-gray); 
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-500); 
   line-height: 1.2;
 }
 
 .kpi-label {
-  color: var(--um-text-secondary);
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
   margin-top: 4px;
 }
 
 .kpi-icon-wrapper {
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 1.5rem;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-lg);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 /* KPI Colors */
-.bg-orange { background-color: rgba(243, 109, 11, 0.15); color: var(--um-orange); }
-.bg-blue { background-color: rgba(0, 103, 208, 0.15); color: var(--um-dark-blue); }
+.bg-orange { background-color: rgba(243, 109, 11, 0.15); color: var(--color-orange-600); }
+.bg-blue { background-color: rgba(0, 103, 208, 0.15); color: var(--color-blue-500); }
 .bg-green { background-color: #e6fffa; color: #276749; } 
 .bg-purple { background-color: #faf5ff; color: #6b46c1; } 
 
@@ -201,33 +224,33 @@ const reports = ref([
 }
 
 .table-header {
-  padding: 1.5rem;
+  padding: var(--spacing-xl);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--um-divider-light);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .section-title {
   margin: 0;
-  font-size: 1.2rem;
-  color: var(--um-dark-blue);
-  font-weight: 700;
+  font-size: var(--font-size-lg);
+  color: var(--color-blue-500);
+  font-weight: var(--font-weight-bold);
 }
 
 .um-btn-primary {
-  background-color: var(--um-orange);
-  color: var(--um-white);
+  background-color: var(--color-orange-600);
+  color: var(--color-white);
   border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 4px;
-  font-weight: 600;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-xs);
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background var(--transition-base);
 }
 
 .um-btn-primary:hover {
-  background-color: var(--um-orange-soft);
+  background-color: var(--color-orange-400);
 }
 
 .table-responsive {
@@ -241,19 +264,19 @@ const reports = ref([
 }
 
 .um-table th {
-  background-color: var(--um-white);
-  color: var(--um-text-secondary);
-  padding: 1rem 1.5rem;
-  font-size: 0.85rem;
+  background-color: var(--color-white);
+  color: var(--color-text-secondary);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  font-size: var(--font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--um-divider-light);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .um-table td {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--um-divider-light);
-  color: var(--um-medium-gray);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-gray-500);
   vertical-align: middle;
 }
 
@@ -262,8 +285,8 @@ const reports = ref([
 }
 
 .text-secondary {
-  color: var(--um-text-secondary);
-  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
 }
 
 .font-bold {
@@ -278,35 +301,35 @@ const reports = ref([
 }
 
 .badge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   display: inline-block;
 }
 
 .status-new {
   background-color: rgba(0, 103, 208, 0.15);
-  color: var(--um-dark-blue);
+  color: var(--color-blue-500);
 }
 
 .status-wip {
   background-color: rgba(243, 109, 11, 0.15);
-  color: var(--um-orange-soft); 
+  color: var(--color-orange-400);
 }
 
 .action-btn {
   background: none;
-  border: 1px solid var(--um-divider-light);
-  border-radius: 4px;
-  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
   cursor: pointer;
-  color: var(--um-medium-gray);
-  transition: all 0.2s;
+  color: var(--color-gray-500);
+  transition: all var(--transition-fast);
 }
 
 .action-btn:hover {
-  border-color: var(--um-medium-gray);
-  color: var(--um-dark-blue);
+  border-color: var(--color-gray-500);
+  color: var(--color-blue-500);
 }
 </style>
