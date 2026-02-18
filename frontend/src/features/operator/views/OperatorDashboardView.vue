@@ -183,7 +183,7 @@ function formatDate(iso: string): string {
 /* Assicurati che nel componente Sidebar.vue ci sia 'height: 100%' nel container principale */
 /* Qui impostiamo solo il layout flex item */
 .um-sidebar { 
-  width: 260px;
+  width: 250px;
   flex-shrink: 0;
   /* Il colore di sfondo è gestito dentro il componente Sidebar, ma per sicurezza: */
   background-color: #1a202c; 

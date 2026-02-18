@@ -53,7 +53,7 @@ export const newReportSchema = z.object({
   zona: z
     .string()
     .min(3, 'Specifica la zona (almeno 3 caratteri)')
-    .max(90, 'La zona non può superare 90 caratteri'),
+    .max(300, 'La zona non può superare 300 caratteri'),
 
   priorita: z
     .enum(['bassa', 'media', 'alta'])

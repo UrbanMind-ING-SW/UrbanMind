@@ -73,17 +73,13 @@
         <div class="um-grid2">
           <div class="um-field">
             <label class="um-label" for="zona">Zona/Indirizzo</label>
-            <input
+            <AddressAutocomplete
               id="zona"
-              name="zona"
-              :value="form.zona"
-              class="um-input"
-              :class="{ 'input-error': touched.zona && errors.zona }"
-              type="text"
+              :model-value="form.zona"
+              :has-error="!!(touched.zona && errors.zona)"
               placeholder="Es. Via Roma 12, Trento"
-              maxlength="90"
-              @change="handleChange"
-              @blur="handleBlur"
+              @update:model-value="(v) => setFieldValue('zona', v)"
+              @select="onAddressSelect"
             />
             <div v-if="touched.zona && errors.zona" class="um-error-text">{{ errors.zona }}</div>
           </div>
@@ -143,6 +139,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import MainNavbar from '@/components/MainNavbar.vue'
+import AddressAutocomplete from '@/components/AddressAutocomplete.vue'
 import { useReportsStore } from '@/stores/reports'
 import { useUserStore } from '@/stores/user'
 import { useForm } from '@/composables/useForm'
@@ -152,6 +149,14 @@ const router = useRouter()
 const reportsStore = useReportsStore()
 const userStore = useUserStore()
 const fileName = ref('')
+const selectedCoords = ref<{ lat: number; lon: number } | null>(null)
+
+function onAddressSelect(coords: { lat: number; lon: number; display_name: string }) {
+  selectedCoords.value = { lat: coords.lat, lon: coords.lon }
+  // Usa un indirizzo compatto: prende solo le prime due parti separate da virgola
+  const compact = coords.display_name.split(',').slice(0, 3).join(',').trim()
+  setFieldValue('zona', compact)
+}
 
 const initialValues: NewReportFormData = {
   titolo: '',
@@ -173,6 +178,7 @@ const {
   handleChange,
   handleBlur,
   handleSubmit,
+  setFieldValue,
   reset,
 } = useForm({
   initialValues,
@@ -190,6 +196,8 @@ const {
         zona: values.zona,
         priorita: values.priorita,
         foto: values.foto,
+        lat: selectedCoords.value?.lat,
+        lon: selectedCoords.value?.lon,
       })
 
       setTimeout(() => router.push({ name: 'proposals' }), 500)

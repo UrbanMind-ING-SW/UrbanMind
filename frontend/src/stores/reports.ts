@@ -14,6 +14,8 @@ export interface Report {
   foto?: File | null
   stato: 'nuovo' | 'in-elaborazione' | 'risolto' | 'respinto'
   reporter?: { name: string; email: string }
+  lat?: number
+  lon?: number
 }
 
 export const useReportsStore = defineStore('reports', () => {
@@ -47,6 +49,8 @@ export const useReportsStore = defineStore('reports', () => {
     zona: string
     priorita: 'bassa' | 'media' | 'alta'
     foto?: File | null
+    lat?: number
+    lon?: number
   }) {
     isLoading.value = true
     error.value = ''
@@ -78,10 +82,10 @@ export const useReportsStore = defineStore('reports', () => {
         location: {
           city: 'Trento',
           address: report.zona,
-          coordinates: { lat: 46.0667, lng: 11.1167 },
+          coordinates: { lat: report.lat ?? 46.0667, lng: report.lon ?? 11.1167 },
         },
         reporter: userId,
-        status: 'aperto', // Cambiato da 'nuova' a 'aperto'
+        status: 'aperto',
       }
 
       console.log('📤 Invio report al backend:', payload)
@@ -171,6 +175,8 @@ export const useReportsStore = defineStore('reports', () => {
       data: r.createdAt ? r.createdAt.split('T')[0] : r.data || new Date().toISOString().split('T')[0],
       stato: (statusMap[r.status] || r.stato || 'nuovo') as Report['stato'],
       reporter: r.reporter ? { name: r.reporter.name || '', email: r.reporter.email || '' } : undefined,
+      lat: r.location?.coordinates?.lat ?? undefined,
+      lon: r.location?.coordinates?.lng ?? undefined,
     }
   }
 

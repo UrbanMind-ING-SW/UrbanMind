@@ -74,9 +74,9 @@
           <p class="um-progressDetail">€{{ statsData.totalSpent }}M / €{{ statsData.totalBudget }}M spesi</p>
         </section>
 
-        <!-- Trend bilancio 2020-2024 -->
+        <!-- Trend bilancio anno su anno -->
         <section class="um-card um-cardWide">
-          <h3 class="um-sectionTitle">Trend Bilancio 2020-2024</h3>
+          <h3 class="um-sectionTitle">{{ trendTitle }}</h3>
           <div class="um-chartWrap">
             <Line :data="lineData" :options="lineOptions" />
           </div>
@@ -322,6 +322,7 @@ const legendItems = ref([]);
 const barData = ref(null);
 const lineData = ref(null);
 const statsData = ref({ totalBudget: '0', totalSpent: '0', missions: 0, chapters: 0 });
+const trendTitle = ref('Trend Bilancio');
 
 // Dati di fallback se il DB è vuoto
 function loadDefaultData() {
@@ -354,9 +355,9 @@ function loadDefaultData() {
   };
 
   lineData.value = {
-    labels: ["2020", "2021", "2022", "2023", "2024"],
+    labels: ["2020", "2021", "2022", "2023", "2024", "2025"],
     datasets: [{
-      label: "Bilancio (M€)", data: [110, 115, 122, 128, 133.4],
+      label: "Bilancio (M€)", data: [110, 115, 122, 128, 133.4, 138.0],
       borderColor: colors.orange, backgroundColor: colors.orange + "33", borderWidth: 3,
       tension: 0.4, fill: true, pointRadius: 6, pointHoverRadius: 8,
       pointBackgroundColor: colors.orange, pointBorderColor: "#fff", pointBorderWidth: 3,
@@ -364,6 +365,7 @@ function loadDefaultData() {
     }],
   };
 
+  trendTitle.value = 'Trend Bilancio 2020–2025';
   statsData.value = { totalBudget: '133.4', totalSpent: '104.2', missions: 6, chapters: 42 };
 }
 
@@ -439,16 +441,7 @@ async function fetchBudgetData() {
       }],
     };
     
-    lineData.value = {
-      labels: ["2020", "2021", "2022", "2023", "2024"],
-      datasets: [{
-        label: "Bilancio (M€)", data: [110, 115, 122, 128, (totalAmount / 1000000)],
-        borderColor: colors.orange, backgroundColor: colors.orange + "33", borderWidth: 3,
-        tension: 0.4, fill: true, pointRadius: 6, pointHoverRadius: 8,
-        pointBackgroundColor: colors.orange, pointBorderColor: "#fff", pointBorderWidth: 3,
-        pointHoverBackgroundColor: colors.orange, pointHoverBorderColor: "#fff", pointHoverBorderWidth: 4,
-      }],
-    };
+    // Il trend viene caricato separatamente da fetchTrendData
     
     statsData.value = {
       totalBudget: (totalAmount / 1000000).toFixed(1),
@@ -469,6 +462,7 @@ onMounted(() => {
   fetchBudgetData();
   fetchAvailableYears();
   fetchAvailableCategories();
+  fetchTrendData();
 });
 
 // Funzioni pulsanti
@@ -680,6 +674,67 @@ async function fetchAvailableCategories() {
       { category: 'sanita', count: 0, totalBudget: 0 },
     ];
     selectedCategories.value = [];
+  }
+}
+
+// Carica i totali reali per anno dal DB per il grafico Trend
+async function fetchTrendData() {
+  try {
+    // Prima ottieni tutti gli anni disponibili
+    const allResponse = await budgetsApi.getAll({ limit: '1000' });
+    const years = [...new Set(allResponse.data.budgets.map(b => b.year))]
+      .filter(y => y)
+      .sort((a, b) => a - b);
+
+    if (years.length === 0) {
+      // Fallback con dati storici plausibili se il DB è vuoto
+      trendTitle.value = 'Trend Bilancio 2020-2025';
+      lineData.value = {
+        labels: ['2020', '2021', '2022', '2023', '2024', '2025'],
+        datasets: [{
+          label: 'Bilancio (M€)',
+          data: [110, 115, 122, 128, 133, 138],
+          borderColor: colors.orange, backgroundColor: colors.orange + '33', borderWidth: 3,
+          tension: 0.4, fill: true, pointRadius: 6, pointHoverRadius: 8,
+          pointBackgroundColor: colors.orange, pointBorderColor: '#fff', pointBorderWidth: 3,
+          pointHoverBackgroundColor: colors.orange, pointHoverBorderColor: '#fff', pointHoverBorderWidth: 4,
+        }],
+      };
+      return;
+    }
+
+    // Ottieni i totali per ogni anno tramite compareYears
+    const compareResponse = await budgetsApi.compareYears(years);
+    const comparison = compareResponse.data.comparison;
+
+    const labels = comparison.map(c => String(c.year));
+    const data = comparison.map(c => parseFloat((c.total.totalBudget / 1000000).toFixed(2)));
+
+    trendTitle.value = `Trend Bilancio ${labels[0]}–${labels[labels.length - 1]}`;
+
+    lineData.value = {
+      labels,
+      datasets: [{
+        label: 'Bilancio Totale (M€)',
+        data,
+        borderColor: colors.orange,
+        backgroundColor: colors.orange + '33',
+        borderWidth: 3,
+        tension: 0.4,
+        fill: true,
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        pointBackgroundColor: colors.orange,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 3,
+        pointHoverBackgroundColor: colors.orange,
+        pointHoverBorderColor: '#fff',
+        pointHoverBorderWidth: 4,
+      }],
+    };
+  } catch (e) {
+    console.warn('fetchTrendData fallback:', e);
+    // Se l'API fallisce, mantieni il lineData già impostato da loadDefaultData o fetchBudgetData
   }
 }
 

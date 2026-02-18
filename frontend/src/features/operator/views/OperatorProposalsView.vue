@@ -110,9 +110,16 @@
                   </button>
                   <button 
                     class="btn btn-details"
-                    @click="viewDetails(proposal.id)"
+                    @click="openDetails(proposal)"
                   >
-                    Dettagli
+                    🔍 Dettagli
+                  </button>
+                  <button 
+                    class="btn btn-delete"
+                    @click="confirmDelete(proposal)"
+                    title="Elimina proposta"
+                  >
+                    Elimina
                   </button>
                 </div>
               </div>
@@ -125,6 +132,79 @@
           <p>Nessuna proposta trovata con i filtri selezionati.</p>
         </div>
       </main>
+    </div>
+
+    <!-- Modal Dettagli Proposta -->
+    <div v-if="detailsModal.open" class="modal-overlay" @click.self="closeDetails">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2>Dettagli Proposta</h2>
+          <button class="modal-close" @click="closeDetails">✕</button>
+        </div>
+        <div class="modal-body" v-if="detailsModal.proposal">
+          <div class="detail-row">
+            <span class="detail-label">Titolo</span>
+            <span class="detail-value fw-bold">{{ detailsModal.proposal.title }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Categoria</span>
+            <span class="category-badge">{{ detailsModal.proposal.category }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Stato</span>
+            <span class="status-badge" :class="`status-${detailsModal.proposal.status}`">{{ detailsModal.proposal.statusText }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Autore</span>
+            <span class="detail-value">👤 {{ detailsModal.proposal.author }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Data</span>
+            <span class="detail-value">{{ detailsModal.proposal.initiatedDate }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Voti</span>
+            <span class="detail-value">👍 {{ detailsModal.proposal.supportCount }}</span>
+          </div>
+          <div class="detail-row" v-if="detailsModal.proposal.zona">
+            <span class="detail-label">Zona</span>
+            <span class="detail-value">📍 {{ detailsModal.proposal.zona }}</span>
+          </div>
+          <div class="detail-row" v-if="detailsModal.proposal.costoStimato">
+            <span class="detail-label">Costo Stimato</span>
+            <span class="detail-value">💶 €{{ detailsModal.proposal.costoStimato.toLocaleString('it-IT') }}</span>
+          </div>
+          <div class="detail-description">
+            <span class="detail-label">Descrizione</span>
+            <p class="detail-desc-text">{{ detailsModal.proposal.description }}</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-reject" @click="confirmDelete(detailsModal.proposal!); closeDetails()">🗑️ Elimina</button>
+          <button class="btn btn-details modal-btn-close" @click="closeDetails">Chiudi</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Conferma Eliminazione -->
+    <div v-if="deleteModal.open" class="modal-overlay" @click.self="cancelDelete">
+      <div class="modal-box modal-box-sm">
+        <div class="modal-header">
+          <h2>Conferma eliminazione</h2>
+          <button class="modal-close" @click="cancelDelete">✕</button>
+        </div>
+        <div class="modal-body">
+          <p>Sei sicuro di voler eliminare la proposta:</p>
+          <p class="delete-title">"{{ deleteModal.proposal?.title }}"?</p>
+          <p class="delete-warning">⚠️ Questa azione non può essere annullata.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-details modal-btn-close" @click="cancelDelete">Annulla</button>
+          <button class="btn btn-delete-confirm" @click="executeDelete" :disabled="deleteModal.loading">
+            {{ deleteModal.loading ? 'Eliminazione...' : 'Elimina' }}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -253,12 +333,54 @@ const rejectProposal = async (id: string) => {
 }
 
 const viewEvaluation = (id: string) => {
-  // Navigazione ai dettagli della proposta
   router.push(`/operator/proposals/${id}`)
 }
 
 const viewDetails = (id: string) => {
   router.push(`/operator/proposals/${id}`)
+}
+
+// --- Modal Dettagli ---
+const detailsModal = ref<{ open: boolean; proposal: any | null }>({ open: false, proposal: null })
+
+function openDetails(proposal: any) {
+  // Recupera anche i dati extra dallo store (zona, costoStimato)
+  const raw = proposalsStore.proposals.find(p => p.id === proposal.id)
+  detailsModal.value = {
+    open: true,
+    proposal: {
+      ...proposal,
+      zona: raw?.zona || '',
+      costoStimato: raw?.costoStimato || 0,
+    }
+  }
+}
+
+function closeDetails() {
+  detailsModal.value = { open: false, proposal: null }
+}
+
+// --- Modal Elimina ---
+const deleteModal = ref<{ open: boolean; proposal: any | null; loading: boolean }>({ open: false, proposal: null, loading: false })
+
+function confirmDelete(proposal: any) {
+  deleteModal.value = { open: true, proposal, loading: false }
+}
+
+function cancelDelete() {
+  deleteModal.value = { open: false, proposal: null, loading: false }
+}
+
+async function executeDelete() {
+  if (!deleteModal.value.proposal) return
+  deleteModal.value.loading = true
+  try {
+    await proposalsStore.deleteProposal(deleteModal.value.proposal.id)
+    cancelDelete()
+  } catch (err) {
+    alert('Errore durante l\'eliminazione della proposta')
+    deleteModal.value.loading = false
+  }
 }
 </script>
 
@@ -571,6 +693,183 @@ const viewDetails = (id: string) => {
 .btn-details:hover {
   background-color: #e8e8e8;
   transform: translateY(-1px);
+}
+
+.btn-delete {
+  background-color: #fff0f0;
+  color: #dc3545;
+  border: 1.5px solid #f5c6cb;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.btn-delete:hover {
+  background-color: #dc3545;
+  color: white;
+  border-color: #dc3545;
+  transform: translateY(-1px);
+}
+
+.btn-delete-confirm {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.btn-delete-confirm:hover:not(:disabled) {
+  background-color: #c82333;
+  transform: translateY(-1px);
+}
+
+.btn-delete-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-box {
+  background: white;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.modal-box-sm {
+  max-width: 420px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #1a202c;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  background: #f0f0f0;
+  color: #1a202c;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.modal-btn-close {
+  background-color: #f5f5f5 !important;
+  color: #1a202c !important;
+  border: 1px solid #d0d0d0 !important;
+}
+
+/* Dettagli */
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.detail-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  min-width: 110px;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  color: #1a202c;
+  font-size: 0.95rem;
+}
+
+.fw-bold {
+  font-weight: 700;
+}
+
+.detail-description {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.detail-desc-text {
+  margin: 0;
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  background: #f9f9f9;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-xs);
+  border-left: 3px solid var(--color-orange-600);
+}
+
+/* Eliminazione */
+.delete-title {
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0.25rem 0;
+}
+
+.delete-warning {
+  color: #856404;
+  background: #fff3cd;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-xs);
+  font-size: 0.9rem;
+  margin: 0;
 }
 
 /* Messaggio assenza proposte */
