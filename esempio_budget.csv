@@ -1,0 +1,21 @@
+Titolo,Descrizione,Budget Totale,Budget Allocato,Categoria,Anno,Stato,Dipartimento
+Manutenzione strade 2023,Progetto per manutenzione stradale ordinaria,250000,180000,infrastrutture,2023,approvato,Lavori Pubblici
+Trasporto pubblico locale,Potenziamento servizio bus urbano,180000,150000,trasporti,2023,in-corso,Trasporti e Mobilità
+Parco urbano centrale,Riqualificazione area verde,120000,90000,ambiente,2023,in-corso,Ambiente e Verde
+Centro anziani,Assistenza domiciliare anziani,150000,140000,sociale,2023,approvato,Servizi Sociali
+Eventi culturali estivi,Festival musica e teatro,80000,65000,cultura,2023,completato,Cultura e Turismo
+Videosorveglianza centro,Installazione telecamere sicurezza,100000,85000,sicurezza,2023,approvato,Polizia Locale
+Scuole primarie,Manutenzione edifici scolastici,200000,170000,istruzione,2023,in-corso,Istruzione
+Ambulatorio territoriale,Servizi sanitari di base,180000,160000,sanita,2023,approvato,Sanità Pubblica
+Digitalizzazione servizi,Modernizzazione sistemi informatici,90000,75000,altro,2023,in-corso,Amministrazione Generale
+Ponti e viadotti,Controllo statico ponti,180000,120000,infrastrutture,2024,proposto,Lavori Pubblici
+Piste ciclabili,Rete ciclabili urbane,140000,0,trasporti,2024,proposto,Trasporti e Mobilità
+Raccolta differenziata,Potenziamento servizio rifiuti,110000,80000,ambiente,2024,approvato,Ambiente e Verde
+Housing sociale,Alloggi popolari,250000,200000,sociale,2024,in-corso,Servizi Sociali
+Biblioteca comunale,Ristrutturazione biblioteca,120000,0,cultura,2024,proposto,Cultura e Turismo
+Vigili urbani,Potenziamento organico,150000,140000,sicurezza,2024,approvato,Polizia Locale
+Asili nido,Ampliamento posti disponibili,220000,180000,istruzione,2024,in-corso,Istruzione
+Prevenzione sanitaria,Campagne screening,95000,70000,sanita,2024,approvato,Sanità Pubblica
+Progetti europei,Partecipazione bandi UE,60000,40000,altro,2024,in-corso,Amministrazione Generale
+Illuminazione pubblica,LED su tutto il territorio,280000,0,infrastrutture,2025,proposto,Lavori Pubblici
+Stazione bus moderna,Nuova stazione autolinee,300000,0,trasporti,2025,proposto,Trasporti e Mobilità

@@ -29,6 +29,19 @@
           </span>
           <span class="button-text">Entra con CIE</span>
         </button>
+
+        <div class="login-divider">
+          <span>oppure</span>
+        </div>
+
+        <!-- Pulsante Test -->
+        <button
+          class="button button-test"
+          @click="handleTestLogin"
+        >
+          <span class="button-icon">&#x1F9EA;</span>
+          <span class="button-text">Accesso Test (Demo)</span>
+        </button>
       </div>
     </main>
   </div>
@@ -41,10 +54,14 @@ import MainNavbar from '@/components/MainNavbar.vue'
 const router = useRouter()
 
 function handleSpidLogin() {
-  router.push('/role-select')
+  alert('Integrazione SPID in arrivo! Per ora usa il pulsante Test.')
 }
 
 function handleCieLogin() {
+  alert('Integrazione CIE in arrivo! Per ora usa il pulsante Test.')
+}
+
+function handleTestLogin() {
   router.push('/role-select')
 }
 </script>
@@ -160,6 +177,31 @@ function handleCieLogin() {
   height: 100%;
 }
 
+
+.button-test {
+  background-color: #e67e22;
+}
+
+.button-test:hover {
+  background-color: #d35400;
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: min(320px, 80vw);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
 
 @media (max-width: 480px) {
   .login-panel {

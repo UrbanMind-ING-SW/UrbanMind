@@ -10,25 +10,25 @@
         <div class="detail-container">
           
           <div class="left-col">
-            <div class="um-card detail-card">
+            <div class="um-card detail-card" v-if="reportsStore.reports.length > 0">
               
               <div class="map-placeholder">
                 <div class="map-icon">
                   <svg width="64" height="64" viewBox="0 0 24 24" fill="#cbd5e0"><path d="M20.5 3l-6 2.25L8.5 3 3.5 4.75v14.5l6-2.25L15.5 19l5-1.75V3zm-6 13.75l-6-2.25V5.5l6 2.25v9z"/></svg>
                 </div>
                 <div class="location-tag">
-                  Via Belenzani, 3, Trento
+                  {{ reportsStore.reports[currentIndex]?.zona || 'Indirizzo non specificato' }}
                 </div>
               </div>
 
               <div class="card-body">
                 <div class="header-row">
-                  <h2 class="report-title">Buca pericolosa su carreggiata</h2>
-                  <span class="status-badge badge-new">Nuova</span>
+                  <h2 class="report-title">{{ reportsStore.reports[currentIndex]?.titolo || 'Nessuna segnalazione' }}</h2>
+                  <span class="status-badge badge-new">{{ reportsStore.reports[currentIndex]?.stato || '' }}</span>
                 </div>
 
                 <p class="report-description">
-                  Segnalo una buca profonda circa 10cm al centro della carreggiata, molto pericolosa per i ciclisti. Allego foto.
+                  {{ reportsStore.reports[currentIndex]?.descrizione || '' }}
                 </p>
 
                 <div class="attachments-section">
@@ -37,8 +37,20 @@
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="#666"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
                   </div>
                 </div>
+
+                <!-- Navigazione tra segnalazioni -->
+                <div v-if="reportsStore.reports.length > 1" style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                  <button class="um-btn-primary" :disabled="currentIndex === 0" @click="currentIndex--" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">← Precedente</button>
+                  <span style="align-self: center; color: #666; font-size: 0.85rem;">{{ currentIndex + 1 }} / {{ reportsStore.reports.length }}</span>
+                  <button class="um-btn-primary" :disabled="currentIndex >= reportsStore.reports.length - 1" @click="currentIndex++" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Successiva →</button>
+                </div>
               </div>
 
+            </div>
+            <div class="um-card detail-card" v-else>
+              <div class="card-body" style="text-align: center; padding: 3rem;">
+                <p style="color: #666;">Nessuna segnalazione presente.</p>
+              </div>
             </div>
           </div>
 
@@ -55,14 +67,18 @@
                   <option value="Respinta">Respinta</option>
                 </select>
               </div>
-              <button class="um-btn-primary full-width">Aggiorna Pratica</button>
+              <button class="um-btn-primary full-width" @click="updatePratica">Aggiorna Pratica</button>
             </div>
 
             <div class="um-card widget-card">
               <h3 class="widget-title sub-title">Dati Cittadino</h3>
-              <div class="user-info">
-                <div class="user-avatar">GU</div>
-                <span class="user-name">Giuseppe Verdi</span>
+              <div class="user-info" v-if="reportsStore.reports[currentIndex]?.reporter">
+                <div class="user-avatar">{{ (reportsStore.reports[currentIndex]?.reporter?.name || '??').split(' ').map((s: string) => s[0]).slice(0,2).join('').toUpperCase() }}</div>
+                <span class="user-name">{{ reportsStore.reports[currentIndex]?.reporter?.name || 'Non disponibile' }}</span>
+              </div>
+              <div class="user-info" v-else>
+                <div class="user-avatar">??</div>
+                <span class="user-name">Cittadino anonimo</span>
               </div>
             </div>
 
@@ -75,21 +91,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import MainNavbar from '@/components/MainNavbar.vue'
 import Sidebar from '@/components/Sidebar.vue'
+import { useReportsStore } from '@/stores/reports'
 
 const router = useRouter();
 const activePage = ref('Segnalazioni');
+const reportsStore = useReportsStore();
 
-// Stato della pratica (collegato alla select)
+const currentIndex = ref(0);
 const currentStatus = ref('Nuova');
 
 const handleMenuClick = (label: string) => {
   activePage.value = label;
   
-  // Mapping delle label ai percorsi
   const routeMap: Record<string, string> = {
     'Dashboard': '/operator/dashboard',
     'Segnalazioni': '/operator/reports',
@@ -103,6 +120,31 @@ const handleMenuClick = (label: string) => {
     router.push(path);
   }
 };
+
+// Carica segnalazioni dal database
+onMounted(async () => {
+  await reportsStore.fetchReports();
+});
+
+// Aggiorna stato della segnalazione corrente
+async function updatePratica() {
+  const report = reportsStore.reports[currentIndex.value];
+  if (!report) return;
+  
+  const statusMap: Record<string, string> = {
+    'Nuova': 'nuova',
+    'In Lavorazione': 'in-lavorazione',
+    'Risolta': 'risolta',
+    'Respinta': 'respinta',
+  };
+  
+  try {
+    await reportsStore.updateReportStatus(report.id, statusMap[currentStatus.value] || 'nuova');
+    alert('Stato aggiornato con successo!');
+  } catch (err) {
+    alert('Errore nell\'aggiornamento dello stato');
+  }
+}
 
 </script>
 

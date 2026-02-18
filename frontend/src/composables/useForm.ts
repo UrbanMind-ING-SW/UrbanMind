@@ -72,6 +72,14 @@ export const useForm = <T extends Record<string, any>>(options: UseFormOptions<T
       ;(form as any)[fieldName] = (target as HTMLInputElement).checked as any
     } else if (target.type === 'radio') {
       ;(form as any)[fieldName] = target.value as any
+    } else if (target.type === 'number') {
+      const value = target.value
+      if (value === '' || value === null) {
+        ;(form as any)[fieldName] = null
+      } else {
+        const numValue = Number(value)
+        ;(form as any)[fieldName] = isNaN(numValue) ? null : numValue
+      }
     } else {
       ;(form as any)[fieldName] = target.value as any
     }
@@ -92,14 +100,14 @@ export const useForm = <T extends Record<string, any>>(options: UseFormOptions<T
       e.preventDefault()
     }
 
-    ;(touched as any) = Object.keys(form).reduce((acc: any, key) => {
-      acc[key] = true
-      return acc
-    }, {})
+    // Segna tutti i campi come touched
+    Object.keys(form).forEach((key) => {
+      ;(touched as any)[key] = true
+    })
 
     const isFormValid = await validateForm()
     if (!isFormValid) {
-      submitError.value = new Error('Form validation failed')
+      submitError.value = new Error('Compila correttamente tutti i campi obbligatori.')
       return
     }
 

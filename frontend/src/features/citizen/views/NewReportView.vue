@@ -123,13 +123,17 @@
             Annulla
           </button>
 
-          <button class="um-btn um-btnPrimary" type="submit" :disabled="!isValid || isSubmitting">
+          <button 
+            class="um-btn um-btnPrimary" 
+            type="submit" 
+            :disabled="!isValid || isSubmitting"
+          >
             {{ isSubmitting ? 'Invio...' : 'Invia segnalazione' }}
           </button>
         </div>
 
         <p v-if="submitError" class="um-error">{{ submitError }}</p>
-        <p v-if="submitSuccess" class="um-success">Segnalazione inviata con successo!</p>
+        <p v-if="submitSuccess" class="um-success">✅ Segnalazione inviata con successo! Ti aggiorneremo sullo stato di risoluzione.</p>
       </form>
     </main>
   </div>
@@ -140,11 +144,13 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import MainNavbar from '@/components/MainNavbar.vue'
 import { useReportsStore } from '@/stores/reports'
+import { useUserStore } from '@/stores/user'
 import { useForm } from '@/composables/useForm'
 import { newReportSchema, type NewReportFormData } from '@/schemas/forms'
 
 const router = useRouter()
 const reportsStore = useReportsStore()
+const userStore = useUserStore()
 const fileName = ref('')
 
 const initialValues: NewReportFormData = {
@@ -173,7 +179,11 @@ const {
   validationSchema: newReportSchema,
   onSubmit: async (values) => {
     try {
-      reportsStore.addReport({
+      if (!userStore.isAuthenticated) {
+        throw new Error('🔒 Devi effettuare il login per inviare una segnalazione. Vai alla pagina di accesso!')
+      }
+
+      await reportsStore.addReport({
         titolo: values.titolo,
         descrizione: values.descrizione,
         categoria: values.categoria,
@@ -182,7 +192,6 @@ const {
         foto: values.foto,
       })
 
-      await new Promise((resolve) => setTimeout(resolve, 600))
       setTimeout(() => router.push({ name: 'proposals' }), 500)
     } catch (err) {
       throw err instanceof Error ? err : new Error('Errore durante l\'invio')

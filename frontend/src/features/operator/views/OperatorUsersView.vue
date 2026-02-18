@@ -76,21 +76,22 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Sidebar from '@/components/Sidebar.vue'
 import MainNavbar from '@/components/MainNavbar.vue'
+import { usersApi } from '@/services/api'
 
 const router = useRouter()
 const q = ref('')
 const page = ref(1)
 const perPage = 5
 const activePage = ref('Utenti')
+const isLoading = ref(false)
 
 const handleMenuClick = (label) => {
   activePage.value = label
   
-  // Mapping delle label ai percorsi
   const routeMap = {
     'Dashboard': '/operator/dashboard',
     'Segnalazioni': '/operator/reports',
@@ -105,14 +106,36 @@ const handleMenuClick = (label) => {
   }
 }
 
-const users = ref([
-  { id: 1, name: 'Giuseppe Verdi', email: 'giuseppe.verdi@email.com', role: 'Cittadino', active: true, registered: '10/11/2024', color: '#6aa7ff' },
-  { id: 2, name: 'Mario Bianchi', email: 'mario.b@spam.com', role: 'Cittadino', active: false, registered: '01/12/2025', color: '#ff9aa2' },
-  { id: 3, name: 'Mario Rossi', email: 'mario.rossi@comune.tn.it', role: 'Admin', active: true, registered: '20/08/2023', color: '#ffb366' },
-  { id: 4, name: 'Anna Neri', email: 'anna.neri@example.com', role: 'Cittadino', active: true, registered: '15/01/2024', color: '#b39ddb' },
-  { id: 5, name: 'Luca Verdi', email: 'luca.verdi@example.com', role: 'Cittadino', active: true, registered: '02/03/2024', color: '#ffd54f' },
-  { id: 6, name: 'Sara Bianchi', email: 'sara.bianchi@example.com', role: 'Cittadino', active: false, registered: '11/11/2024', color: '#81c784' }
-])
+const users = ref([])
+
+const colors = ['#6aa7ff', '#ff9aa2', '#ffb366', '#b39ddb', '#ffd54f', '#81c784', '#f48fb1', '#4fc3f7']
+
+// Carica utenti dal database
+onMounted(async () => {
+  isLoading.value = true
+  try {
+    const response = await usersApi.getAll()
+    users.value = response.data.map((u, idx) => ({
+      id: u._id || u.id,
+      name: u.name || '',
+      email: u.email || '',
+      role: u.role === 'operator' ? 'Operatore' : u.role === 'admin' ? 'Admin' : 'Cittadino',
+      active: u.isActive !== false,
+      registered: u.createdAt ? formatDate(u.createdAt) : '',
+      color: colors[idx % colors.length],
+    }))
+  } catch (err) {
+    console.error('Errore nel caricamento utenti:', err)
+  } finally {
+    isLoading.value = false
+  }
+})
+
+function formatDate(dateStr) {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`
+}
 
 const filtered = computed(() => {
   const term = q.value.trim().toLowerCase()
@@ -132,16 +155,36 @@ function avatarInitials(name){
   return name.split(' ').map(s => s[0]).slice(0,2).join('').toUpperCase()
 }
 
-function edit(user){
-  alert('Modifica: ' + user.name)
+async function edit(user){
+  const newName = prompt('Nuovo nome:', user.name)
+  if (newName && newName !== user.name) {
+    try {
+      await usersApi.update(user.id, { name: newName })
+      user.name = newName
+    } catch (err) {
+      alert('Errore nella modifica: ' + (err.message || err))
+    }
+  }
 }
 
-function toggleStatus(user){
-  user.active = !user.active
+async function toggleStatus(user){
+  try {
+    await usersApi.update(user.id, { isActive: !user.active })
+    user.active = !user.active
+  } catch (err) {
+    alert('Errore nel cambio stato: ' + (err.message || err))
+  }
 }
 
 function more(user){
-  alert('Azioni aggiuntive per: ' + user.name)
+  if (confirm(`Eliminare l'utente ${user.name}?`)) {
+    usersApi.delete(user.id).then(() => {
+      const idx = users.value.findIndex(u => u.id === user.id)
+      if (idx !== -1) users.value.splice(idx, 1)
+    }).catch(err => {
+      alert('Errore nell\'eliminazione: ' + (err.message || err))
+    })
+  }
 }
 </script>
 

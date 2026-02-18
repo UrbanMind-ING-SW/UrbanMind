@@ -130,13 +130,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import MainNavbar from '@/components/MainNavbar.vue'
 import Sidebar from '@/components/Sidebar.vue'
+import { useProposalsStore } from '@/stores/proposals'
 
 const router = useRouter()
 const activePage = ref('Proposte')
+const proposalsStore = useProposalsStore()
 
 // Stato dei filtri
 const selectedStatus = ref('')
@@ -145,7 +147,6 @@ const selectedCategory = ref('')
 const handleMenuClick = (label: string) => {
   activePage.value = label
   
-  // Mapping delle label ai percorsi
   const routeMap: Record<string, string> = {
     'Dashboard': '/operator/dashboard',
     'Segnalazioni': '/operator/reports',
@@ -160,45 +161,61 @@ const handleMenuClick = (label: string) => {
   }
 }
 
-// Dati proposte
-const proposals = ref([
-  {
-    id: 1,
-    category: 'MOBILITÀ',
-    title: 'Nuova pista ciclabile Lungadige',
-    description: 'Proposiamo di estendere la pista ciclabile esistente per collegare meglio la zona universitaria con il centro storico, riducendo il traffico veicolare. Budget stimato: €45.000.',
-    author: 'Luigi Bianchi',
-    supportCount: 124,
-    initiatedDate: '03/12/2025',
-    status: 'valutazione',
-    statusLabel: 'In Valutazione',
-    statusText: 'In Valutazione'
-  },
-  {
-    id: 2,
-    category: 'VERDE PUBBLICO',
-    title: 'Riqualificazione Parco Santa Chiara',
-    description: 'Installazione di nuove panchine e aree gioco per bambini inclusive.',
-    author: 'Anna Neri',
-    supportCount: 89,
-    initiatedDate: '01/12/2025',
-    status: 'ammissibile',
-    statusLabel: 'Ammissibile',
-    statusText: 'Ammissibile'
-  },
-  {
-    id: 3,
-    category: 'MOBILITÀ',
-    title: 'Parcheggi dedicati ai residenti',
-    description: 'Creazione di zone di parcheggio riservate ai residenti della zona centro con tariffe agevolate per favorire la sosta.',
-    author: 'Marco Rossi',
-    supportCount: 67,
-    initiatedDate: '15/11/2025',
-    status: 'valutazione',
-    statusLabel: 'In Valutazione',
-    statusText: 'In Valutazione'
-  },
-])
+// Carica proposte dal database al montaggio
+onMounted(async () => {
+  await proposalsStore.fetchProposals()
+})
+
+// Mappa le proposte dallo store al formato della vista
+const proposals = computed(() => {
+  return proposalsStore.proposals.map(p => {
+    const statusMap: Record<string, string> = {
+      'in-valutazione': 'valutazione',
+      'sottoposta': 'valutazione',
+      'approvata': 'approvata',
+      'respinta': 'rifiutata',
+      'bozza': 'valutazione',
+    }
+    
+    const categoryMapUpper: Record<string, string> = {
+      'Mobilità': 'MOBILITÀ',
+      'Ambiente': 'VERDE PUBBLICO',
+      'Sicurezza': 'SICUREZZA',
+      'Tecnologia': 'TECNOLOGIA',
+      'Sport': 'SPORT',
+      'Cultura': 'CULTURA',
+      'Altro': 'ALTRO',
+    }
+
+    const statusTextMap: Record<string, string> = {
+      'valutazione': 'In Valutazione',
+      'approvata': 'Approvata',
+      'rifiutata': 'Rifiutata',
+      'ammissibile': 'Ammissibile',
+    }
+
+    const status = statusMap[p.stato] || 'valutazione'
+
+    return {
+      id: p.id,
+      category: categoryMapUpper[p.categoria] || p.categoria.toUpperCase(),
+      title: p.titolo,
+      description: p.descrizione,
+      author: p.proponente?.name || 'Cittadino',
+      supportCount: p.voti,
+      initiatedDate: formatDate(p.data),
+      status: status,
+      statusLabel: statusTextMap[status] || status,
+      statusText: statusTextMap[status] || status,
+    }
+  })
+})
+
+function formatDate(iso: string): string {
+  if (!iso) return ''
+  const [y, m, d] = iso.split('-')
+  return `${d}/${m}/${y}`
+}
 
 // Proposte filtrate
 const filteredProposals = computed(() => {
@@ -218,25 +235,30 @@ const filteredProposals = computed(() => {
   })
 })
 
-// Metodi di azione
-const approveProposal = (id: number) => {
-  alert(`Proposta ${id} approvata!`)
-  // Logica di approvazione
+// Metodi di azione collegati al database
+const approveProposal = async (id: string) => {
+  try {
+    await proposalsStore.approveProposal(id)
+  } catch (err) {
+    alert('Errore nell\'approvazione della proposta')
+  }
 }
 
-const rejectProposal = (id: number) => {
-  alert(`Proposta ${id} rifiutata!`)
-  // Logica di rifiuto
+const rejectProposal = async (id: string) => {
+  try {
+    await proposalsStore.rejectProposal(id)
+  } catch (err) {
+    alert('Errore nel rifiuto della proposta')
+  }
 }
 
-const viewEvaluation = (id: number) => {
-  alert(`Visualizzazione valutazione della proposta ${id}`)
-  // Logica per visualizzare valutazione
+const viewEvaluation = (id: string) => {
+  // Navigazione ai dettagli della proposta
+  router.push(`/operator/proposals/${id}`)
 }
 
-const viewDetails = (id: number) => {
-  alert(`Visualizzazione dettagli della proposta ${id}`)
-  // Logica per visualizzare dettagli
+const viewDetails = (id: string) => {
+  router.push(`/operator/proposals/${id}`)
 }
 </script>
 

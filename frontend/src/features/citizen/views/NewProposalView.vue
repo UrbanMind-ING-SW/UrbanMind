@@ -112,13 +112,17 @@
             Annulla
           </button>
 
-          <button class="um-btn um-btnPrimary" type="submit" :disabled="!isValid || isSubmitting">
+          <button
+            class="um-btn um-btnPrimary" 
+            type="submit" 
+            :disabled="!isValid || isSubmitting"
+          >
             {{ isSubmitting ? 'Invio...' : 'Invia proposta' }}
           </button>
         </div>
 
         <p v-if="submitError" class="um-error">{{ submitError }}</p>
-        <p v-if="submitSuccess" class="um-success">Proposta inviata con successo!</p>
+        <p v-if="submitSuccess" class="um-success">🎉 Proposta inviata con successo! È ora in valutazione da parte degli operatori.</p>
       </form>
     </main>
   </div>
@@ -128,11 +132,13 @@
 import { useRouter } from 'vue-router'
 import MainNavbar from '@/components/MainNavbar.vue'
 import { useProposalsStore } from '@/stores/proposals'
+import { useUserStore } from '@/stores/user'
 import { useForm } from '@/composables/useForm'
 import { newProposalSchema, type NewProposalFormData } from '@/schemas/forms'
 
 const router = useRouter()
 const proposalsStore = useProposalsStore()
+const userStore = useUserStore()
 
 const initialValues: NewProposalFormData = {
   titolo: '',
@@ -159,16 +165,18 @@ const {
   validationSchema: newProposalSchema,
   onSubmit: async (values) => {
     try {
-      proposalsStore.addProposal({
+      if (!userStore.isAuthenticated) {
+        throw new Error('🔒 Devi effettuare il login per inviare una proposta. Vai alla pagina di accesso!')
+      }
+
+      await proposalsStore.addProposal({
         titolo: values.titolo,
         descrizione: values.descrizione,
         categoria: values.categoria,
-        stato: 'in-valutazione',
-        data: new Date().toISOString().split('T')[0]!,
         zona: values.zona || '',
+        budget: values.budget,
       })
 
-      await new Promise((resolve) => setTimeout(resolve, 600))
       setTimeout(() => router.push({ name: 'proposals' }), 500)
     } catch (err) {
       throw err instanceof Error ? err : new Error('Errore durante l\'invio')

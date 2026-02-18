@@ -39,7 +39,10 @@
     </section>
 
     <main class="um-main">
-      <div class="um-grid">
+      <div v-if="proposalsStore.isLoading" class="um-empty">
+        Caricamento proposte...
+      </div>
+      <div v-else class="um-grid">
         <article
           v-for="p in proposalsStore.sortedProposals"
           :key="p.id"
@@ -70,6 +73,7 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import MainNavbar from '@/components/MainNavbar.vue'
 import { useProposalsStore } from '@/stores/proposals'
@@ -77,11 +81,17 @@ import { useProposalsStore } from '@/stores/proposals'
 const router = useRouter()
 const proposalsStore = useProposalsStore()
 
+// Carica le proposte dal database al montaggio
+onMounted(async () => {
+  await proposalsStore.fetchProposals()
+})
+
 function createNewProposal() {
   router.push({ name: 'proposal-new' })
 }
 
 function formatDate(iso: string): string {
+  if (!iso) return ''
   const [y, m, d] = iso.split('-')
   return `${d}/${m}/${y}`
 }
@@ -89,8 +99,10 @@ function formatDate(iso: string): string {
 function getLabelStato(stato: string): string {
   const labels: Record<string, string> = {
     'in-valutazione': 'In valutazione',
+    'sottoposta': 'In valutazione',
     approvata: 'Approvata',
     respinta: 'Respinta',
+    bozza: 'Bozza',
   }
   return labels[stato] || stato
 }
@@ -98,7 +110,7 @@ function getLabelStato(stato: string): string {
 function getStatusClass(stato: string) {
   return {
     'um-chip--ok': stato === 'approvata',
-    'um-chip--wait': stato === 'in-valutazione',
+    'um-chip--wait': stato === 'in-valutazione' || stato === 'sottoposta',
     'um-chip--no': stato === 'respinta',
   }
 }

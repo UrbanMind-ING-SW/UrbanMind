@@ -8,29 +8,65 @@
       <h1 class="role-title">Accedi al sito di UrbanMind</h1>
 
       <div class="role-actions">
-        <button class="role-btn" @click="goCitizen">
-          Entra come cittadino
+        <button class="role-btn" @click="goCitizen" :disabled="isLoggingIn">
+          {{ isLoggingIn ? 'Accesso in corso...' : 'Entra come cittadino' }}
         </button>
-        <button class="role-btn" @click="goOperator">
-          Entra come operatore
+        <button class="role-btn role-btn-operator" @click="goOperator" :disabled="isLoggingIn">
+          {{ isLoggingIn ? 'Accesso in corso...' : 'Entra come operatore' }}
         </button>
       </div>
+      <p v-if="loginError" class="role-error">{{ loginError }}</p>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import MainNavbar from '@/components/MainNavbar.vue'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
+const userStore = useUserStore()
+const isLoggingIn = ref(false)
+const loginError = ref('')
+
+async function loginAs(role: 'citizen' | 'operator') {
+  isLoggingIn.value = true
+  loginError.value = ''
+
+  const email = role === 'citizen' ? 'cittadino@urbanmind.it' : 'operatore@urbanmind.it'
+  const password = 'urbanmind123'
+  const name = role === 'citizen' ? 'Cittadino Test' : 'Operatore Test'
+
+  try {
+    // Prova il login
+    let success = await userStore.login(email, password)
+
+    if (!success) {
+      // Se l'utente non esiste ancora, lo registra automaticamente
+      userStore.clearError()
+      success = await userStore.register(name, email, password, role, 'Trento')
+    }
+
+    if (success) {
+      router.push(role === 'citizen' ? '/citizen/dashboard' : '/operator/dashboard')
+    } else {
+      loginError.value = userStore.error || 'Accesso fallito'
+    }
+  } catch (err) {
+    loginError.value = err instanceof Error ? err.message : 'Errore di connessione'
+  } finally {
+    isLoggingIn.value = false
+  }
+}
 
 function goCitizen() {
-  router.push('/citizen/dashboard')
+  loginAs('citizen')
 }
 
 function goOperator() {
-  router.push('/operator/dashboard')
+  loginAs('operator')
 }
 </script>
 
@@ -113,6 +149,23 @@ function goOperator() {
 .role-btn:focus-visible {
   outline: 2px solid var(--color-border-focus);
   outline-offset: 2px;
+}
+
+.role-btn-operator {
+  background: #27ae60;
+}
+
+.role-btn-operator:hover {
+  background-color: #1e8449;
+}
+
+.role-error {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
+  background: rgba(231, 76, 60, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-xs);
 }
 
 /* Ritocchi solo per schermi piccoli */

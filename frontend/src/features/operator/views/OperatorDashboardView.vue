@@ -73,18 +73,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import MainNavbar from '@/components/MainNavbar.vue'
 import Sidebar from '@/components/Sidebar.vue'
+import { useReportsStore } from '@/stores/reports'
+import { useProposalsStore } from '@/stores/proposals'
 
 const router = useRouter();
 const activePage = ref('Dashboard');
+const reportsStore = useReportsStore();
+const proposalsStore = useProposalsStore();
 
 const handleMenuClick = (label: string) => {
   activePage.value = label;
   
-  // Mapping delle label ai percorsi
   const routeMap: Record<string, string> = {
     'Dashboard': '/operator/dashboard',
     'Segnalazioni': '/operator/reports',
@@ -99,35 +102,63 @@ const handleMenuClick = (label: string) => {
   }
 };
 
-// Dati Simulati KPI
-const stats = ref([
-  { value: '12', label: 'Segnalazioni Nuove', icon: '&#128233;', colorClass: 'bg-orange' },
-  { value: '45', label: 'In Lavorazione', icon: '&#128679;', colorClass: 'bg-blue' },
-  { value: '128', label: 'Proposte Bilancio', icon: '&#9989;', colorClass: 'bg-green' },
-  { value: '98%', label: 'SLA Rispettati', icon: '&#128200;', colorClass: 'bg-purple' },
+// Carica dati reali dal database
+onMounted(async () => {
+  await Promise.all([
+    reportsStore.fetchReports(),
+    proposalsStore.fetchProposals(),
+  ]);
+});
+
+// KPI calcolati dai dati reali
+const stats = computed(() => [
+  { value: String(reportsStore.newReports.length), label: 'Segnalazioni Nuove', icon: '&#128233;', colorClass: 'bg-orange' },
+  { value: String(reportsStore.inProgressReports.length), label: 'In Lavorazione', icon: '&#128679;', colorClass: 'bg-blue' },
+  { value: String(proposalsStore.proposals.length), label: 'Proposte Totali', icon: '&#9989;', colorClass: 'bg-green' },
+  { value: String(reportsStore.resolvedReports.length), label: 'Segnalazioni Risolte', icon: '&#128200;', colorClass: 'bg-purple' },
 ]);
 
-// Dati Simulati Tabella
-const reports = ref([
-  { 
-    id: '#SEG-2045', 
-    category: 'Viabilità', 
-    catIcon: '&#128739;', 
-    title: 'Buca pericolosa Via Belenzani', 
-    date: '02/12/2025', 
-    status: 'Nuova', 
-    statusClass: 'status-new' 
-  },
-  { 
-    id: '#SEG-2044', 
-    category: 'Rifiuti', 
-    catIcon: '&#128465;', 
-    title: 'Mancata raccolta Piazza Duomo', 
-    date: '01/12/2025', 
-    status: 'In Lavorazione', 
-    statusClass: 'status-wip' 
-  },
-]);
+// Ultime segnalazioni dalla tabella
+const reports = computed(() => {
+  const catIcons: Record<string, string> = {
+    'Viabilità': '&#128739;',
+    'Rifiuti': '&#128465;',
+    'Illuminazione': '&#128161;',
+    'Sicurezza': '&#128274;',
+    'Verde Pubblico': '&#127795;',
+    'Altro': '&#128203;',
+  };
+
+  const statusClasses: Record<string, string> = {
+    'nuovo': 'status-new',
+    'in-elaborazione': 'status-wip',
+    'risolto': 'status-resolved',
+    'respinto': 'status-rejected',
+  };
+
+  const statusLabels: Record<string, string> = {
+    'nuovo': 'Nuova',
+    'in-elaborazione': 'In Lavorazione',
+    'risolto': 'Risolta',
+    'respinto': 'Respinta',
+  };
+
+  return reportsStore.reports.slice(0, 10).map((r, idx) => ({
+    id: `#SEG-${String(idx + 1).padStart(4, '0')}`,
+    category: r.categoria,
+    catIcon: catIcons[r.categoria] || '&#128203;',
+    title: r.titolo,
+    date: formatDate(r.data),
+    status: statusLabels[r.stato] || r.stato,
+    statusClass: statusClasses[r.stato] || 'status-new',
+  }));
+});
+
+function formatDate(iso: string): string {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
 </script>
 
 <style scoped>

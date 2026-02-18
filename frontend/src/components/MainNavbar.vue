@@ -15,7 +15,7 @@
     <h1 class="um-title">{{ title }}</h1>
     
     <div class="um-user">
-      <span class="um-user-label">{{ userLabel }}</span>
+      <span class="um-user-label">{{ dynamicUserLabel }}</span>
       <span class="um-user-name">{{ userName }}</span>
 
     </div>
@@ -41,6 +41,16 @@ const router = useRouter()
 const userStore = useUserStore()
 
 const userName = computed(() => userStore.userName ?? 'Nome Utente')
+
+const dynamicUserLabel = computed(() => {
+  if (!userStore.isAuthenticated) return props.userLabel
+  const roleMap: Record<string, string> = {
+    citizen: 'Cittadino loggato',
+    operator: 'Operatore loggato',
+    admin: 'Admin loggato',
+  }
+  return roleMap[userStore.userRole] || props.userLabel
+})
 
 function goToLogin() {
   router.push('/')
