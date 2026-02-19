@@ -23,12 +23,4 @@ export default defineConfig({
       },
     },
   },
-  preview: {
-    host: '0.0.0.0',
-    port: 10000,
-    allowedHosts: [
-      'urbanmind-frontend.onrender.com',
-      '.onrender.com' // Permette tutti i sottodomini onrender.com
-    ]
-  },
 })

@@ -22,7 +22,7 @@ services:
     plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build
-    startCommand: npm run preview -- --host 0.0.0.0 --port $PORT
+    startCommand: npm run serve
     envVars:
       - key: VITE_API_URL
         value: https://urbanmind-backend.onrender.com/api
