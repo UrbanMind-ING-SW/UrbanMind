@@ -1,0 +1,644 @@
+openapi: 3.0.0
+info:
+  version: '1.0'
+  title: "UrbanMind OpenAPI 3.0"
+  description: API for managing municipal budgets, proposals and reports in smart cities.
+  license:
+    name: MIT
+  contact:
+    name: UrbanMind Team
+    email: admin@urbanmind.com
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://urbanmind-backend.onrender.com/api
+    description: Production server
+
+paths:
+  # Authentication
+  /users/login:
+    post:
+      summary: User login
+      description: Authenticate user and return JWT token
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User email address
+                password:
+                  type: string
+                  description: User password
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      token:
+                        type: string
+        '401':
+          description: Invalid credentials
+  
+  /users/register:
+    post:
+      summary: User registration
+      description: Register a new user in the system
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  description: User full name
+                email:
+                  type: string
+                  format: email
+                  description: User email address
+                password:
+                  type: string
+                  minLength: 6
+                  description: User password
+                role:
+                  type: string
+                  enum: [cittadino, operatore]
+                  default: cittadino
+                  description: User role
+                city:
+                  type: string
+                  description: User city
+                age:
+                  type: integer
+                  minimum: 16
+                  description: User age
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      token:
+                        type: string
+
+  # Budgets
+  /budgets:
+    get:
+      summary: Get all budgets
+      description: Retrieve budgets with optional filters and pagination
+      tags:
+        - Budgets
+      parameters:
+        - in: query
+          name: category
+          schema:
+            type: string
+            enum: [infrastrutture, trasporti, ambiente, sociale, cultura, sicurezza, istruzione, sanita, altro]
+          description: Filter by budget category
+        - in: query
+          name: year
+          schema:
+            type: integer
+            minimum: 2020
+            maximum: 2050
+          description: Filter by year
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [proposto, in_revisione, approvato, respinto, in_corso, completato]
+          description: Filter by budget status
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          description: Number of items per page
+      responses:
+        '200':
+          description: List of budgets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      budgets:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Budget'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+    post:
+      summary: Create new budget
+      description: Create a new municipal budget
+      tags:
+        - Budgets
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BudgetInput'
+      responses:
+        '201':
+          description: Budget created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Budget'
+
+  /budgets/{id}:
+    get:
+      summary: Get budget by ID
+      description: Retrieve a specific budget by its ID
+      tags:
+        - Budgets
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Budget ID
+      responses:
+        '200':
+          description: Budget details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Budget'
+        '404':
+          description: Budget not found
+
+  /budgets/stats/{year}:
+    get:
+      summary: Get budget statistics by year
+      description: Retrieve budget statistics aggregated by category for a specific year
+      tags:
+        - Budgets
+      parameters:
+        - in: path
+          name: year
+          required: true
+          schema:
+            type: integer
+          description: Year for statistics
+      responses:
+        '200':
+          description: Budget statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/BudgetStats'
+
+  /budgets/compare/years:
+    get:
+      summary: Compare budgets across years
+      description: Compare budget data between multiple years
+      tags:
+        - Budgets
+      parameters:
+        - in: query
+          name: years
+          required: true
+          schema:
+            type: string
+          description: Comma-separated list of years to compare (e.g., "2023,2024,2025")
+      responses:
+        '200':
+          description: Year comparison data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      comparison:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/YearComparison'
+
+  /budgets/categories/list:
+    get:
+      summary: Get budget categories
+      description: Retrieve list of available budget categories with statistics
+      tags:
+        - Budgets
+      responses:
+        '200':
+          description: Budget categories list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      categories:
+                        type: array
+                        items:
+                          type: string
+                      details:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CategoryDetails'
+
+  /budgets/report/{format}:
+    get:
+      summary: Generate budget report
+      description: Generate budget report in CSV or JSON format
+      tags:
+        - Budgets
+      parameters:
+        - in: path
+          name: format
+          required: true
+          schema:
+            type: string
+            enum: [csv, json]
+          description: Report format (csv or json)
+        - in: query
+          name: year
+          schema:
+            type: integer
+          description: Filter by year
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Filter by category
+      responses:
+        '200':
+          description: Report generated successfully
+          content:
+            text/csv:
+              schema:
+                type: string
+                description: CSV report file
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      budgets:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Budget'
+                      statistics:
+                        $ref: '#/components/schemas/BudgetStats'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      required:
+        - _id
+        - name
+        - email
+        - role
+      properties:
+        _id:
+          type: string
+          description: User ID
+        name:
+          type: string
+          description: User full name
+        email:
+          type: string
+          format: email
+          description: User email address
+        role:
+          type: string
+          enum: [cittadino, operatore]
+          description: User role
+        city:
+          type: string
+          description: User city
+        age:
+          type: integer
+          description: User age
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation date
+
+    Budget:
+      type: object
+      required:
+        - _id
+        - title
+        - totalAmount
+        - category
+        - year
+        - status
+      properties:
+        _id:
+          type: string
+          description: Budget ID
+        title:
+          type: string
+          description: Budget title
+        description:
+          type: string
+          description: Budget description
+        totalAmount:
+          type: number
+          format: float
+          description: Total budget amount in euros
+        allocatedAmount:
+          type: number
+          format: float
+          description: Already allocated amount in euros
+        remainingAmount:
+          type: number
+          format: float
+          description: Remaining available amount in euros
+        category:
+          type: string
+          enum: [infrastrutture, trasporti, ambiente, sociale, cultura, sicurezza, istruzione, sanita, altro]
+          description: Budget category (mission)
+        year:
+          type: integer
+          description: Budget year
+        status:
+          type: string
+          enum: [proposto, in_revisione, approvato, respinto, in_corso, completato]
+          description: Budget status
+        department:
+          type: string
+          description: Responsible department
+        manager:
+          $ref: '#/components/schemas/User'
+        startDate:
+          type: string
+          format: date
+          description: Budget start date
+        endDate:
+          type: string
+          format: date
+          description: Budget end date
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    BudgetInput:
+      type: object
+      required:
+        - title
+        - description
+        - totalAmount
+        - category
+        - year
+        - department
+        - manager
+        - startDate
+        - endDate
+      properties:
+        title:
+          type: string
+          minLength: 5
+          maxLength: 200
+          description: Budget title
+        description:
+          type: string
+          minLength: 10
+          maxLength: 2000
+          description: Budget description
+        totalAmount:
+          type: number
+          format: float
+          minimum: 0
+          description: Total budget amount in euros
+        category:
+          type: string
+          enum: [infrastrutture, trasporti, ambiente, sociale, cultura, sicurezza, istruzione, sanita, altro]
+          description: Budget category
+        year:
+          type: integer
+          minimum: 2020
+          maximum: 2050
+          description: Budget year
+        department:
+          type: string
+          description: Responsible department
+        manager:
+          type: string
+          description: Manager user ID
+        startDate:
+          type: string
+          format: date
+          description: Budget start date
+        endDate:
+          type: string
+          format: date
+          description: Budget end date
+
+    BudgetStats:
+      type: object
+      properties:
+        byCategory:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: string
+                description: Category name
+              totalBudget:
+                type: number
+                description: Total budget for category
+              allocatedBudget:
+                type: number
+                description: Allocated budget for category
+              remainingBudget:
+                type: number
+                description: Remaining budget for category
+              count:
+                type: integer
+                description: Number of budgets in category
+        total:
+          type: object
+          properties:
+            totalBudget:
+              type: number
+            allocatedBudget:
+              type: number
+            remainingBudget:
+              type: number
+            count:
+              type: integer
+
+    YearComparison:
+      type: object
+      properties:
+        year:
+          type: integer
+          description: Year being compared
+        byCategory:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: string
+              totalBudget:
+                type: number
+              allocatedBudget:
+                type: number
+              remainingBudget:
+                type: number
+              count:
+                type: integer
+        total:
+          type: object
+          properties:
+            totalBudget:
+              type: number
+            allocatedBudget:
+              type: number
+            remainingBudget:
+              type: number
+            count:
+              type: integer
+
+    CategoryDetails:
+      type: object
+      properties:
+        category:
+          type: string
+          description: Category name
+        count:
+          type: integer
+          description: Number of budgets in category
+        totalBudget:
+          type: number
+          description: Total budget for category
+        years:
+          type: array
+          items:
+            type: integer
+          description: Years with data for this category
+
+    Pagination:
+      type: object
+      properties:
+        current:
+          type: integer
+          description: Current page number
+        pages:
+          type: integer
+          description: Total number of pages
+        total:
+          type: integer
+          description: Total number of items
+        hasNext:
+          type: boolean
+          description: Whether there is a next page
+        hasPrev:
+          type: boolean
+          description: Whether there is a previous page
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          description: Error message
+        errors:
+          type: array
+          items:
+            type: string
+          description: Detailed error information

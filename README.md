@@ -90,3 +90,18 @@ Per popolare il database con dati di esempio:
 cd backend
 node scripts/seedHistoricalData.js
 ```
+
+## 📚 Documentazione API
+
+Le API sono documentate secondo lo standard OpenAPI 3.0:
+
+**📖 [Documentazione API Completa](docs/API_DOCUMENTATION.md)**
+
+**📋 [Specifica OpenAPI](docs/openapi.yaml)**
+
+Endpoints principali:
+- `POST /api/users/login` - Autenticazione
+- `GET /api/budgets` - Lista budget con filtri
+- `GET /api/budgets/report/{format}` - Download report CSV/JSON 
+- `GET /api/budgets/compare/years` - Confronto multi-anno
+- `GET /api/budgets/stats/{year}` - Statistiche aggregate
